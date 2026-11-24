@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ЭУР-Мастер — Ремонт ЭУР и блоков управления (ЭБУ) в Уфе, ул. Самаркандская, 1/4</title>
+  <meta name="description" content="Профильная мастерская «ЭУР-Мастер» в г. Уфа (ул. Самаркандская, 1/4). Ремонт электроусилителей руля (ЭУР), рулевых колонок с ЭУР и компонентная пайка электронных блоков управления ЭБУ ЭУР (MOSFET, реле, драйверы, SMD) для всех марок авто. Цены от 5 000 ₽. Приём блоков через СДЭК.">
+
+  <!-- Шрифты Inter и JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dash: {
+              base: '#0b0e14',
+              surface: '#121722',
+              elevated: '#182030',
+              input: '#0d111a'
+            },
+            amberdash: {
+              DEFAULT: '#f59e0b',
+              hot: '#ff6b00'
+            },
+            emeralddash: {
+              DEFAULT: '#10b981'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace']
+          },
+          boxShadow: {
+            amberGlow: '0 10px 28px rgba(245, 158, 11, 0.25)',
+            emeraldGlow: '0 10px 28px rgba(16, 185, 129, 0.25)',
+            panel: '0 22px 54px rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Базовые стили и анимации приборной панели */
+    body {
+      background-color: #0b0e14;
+      color: #f1f5f9;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    /* Текстура сетки / карбона приборной панели */
+    .dash-grid {
+      background-image:
+        linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+      background-size: 36px 36px;
+    }
+
+    @keyframes dotPulse {
+      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+
+    @keyframes alertBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+
+    @keyframes radarPing {
+      0% { transform: scale(0.8); opacity: 0.75; }
+      75%, 100% { transform: scale(2.35); opacity: 0; }
+    }
+
+    @keyframes epsErrGlow {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.75)) drop-shadow(0 0 18px rgba(255, 107, 0, 0.4)); }
+      50% { filter: drop-shadow(0 0 16px rgba(239, 68, 68, 1)) drop-shadow(0 0 30px rgba(245, 158, 11, 0.7)); }
+    }
+
+    @keyframes epsOkGlow {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.7)); }
+      50% { filter: drop-shadow(0 0 22px rgba(16, 185, 129, 1)); }
+    }
+
+    .pulse-amber {
+      animation: dotPulse 1.9s infinite;
+    }
+
+    .blink-alert {
+      animation: alertBlink 1.3s ease-in-out infinite;
+    }
+
+    .radar-ping {
+      animation: radarPing 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+
+    .eps-glow-err {
+      animation: epsErrGlow 2s ease-in-out infinite;
+    }
+
+    .eps-glow-ok {
+      animation: epsOkGlow 2.3s ease-in-out infinite;
+    }
+
+    /* Плавный аккордеон FAQ */
+    .faq-content {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.28s ease;
+    }
+    .faq-item[data-open="true"] .faq-content {
+      grid-template-rows: 1fr;
+    }
+    .faq-item[data-open="true"] .faq-chevron {
+      transform: rotate(180deg);
+      color: #f59e0b;
+    }
+  </style>
+</head>
+<body class="bg-dash-base text-slate-100 antialiased overflow-x-hidden selection:bg-amberdash/30 selection:text-amber-200">
+
+  <!-- ===================== 1. STICKY HEADER ===================== -->
+  <header id="top" class="sticky top-0 z-50 bg-dash-base/90 backdrop-blur-xl border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between gap-3 h-[76px]">
+
+        <!-- Логотип + компактный кликабельный бейдж адреса -->
+        <div class="flex items-center gap-3 min-w-0">
+          <a href="#top" class="flex items-center gap-2.5 shrink-0 group" aria-label="ЭУР-Мастер — на главную">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amberdash to-amberdash-hot p-[2px] shadow-amberGlow">
+              <div class="w-full h-full rounded-[10px] bg-dash-base flex items-center justify-center">
+                <!-- Векторная иконка руля и чипа ЭБУ ЭУР -->
+                <svg width="22" height="22" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                  <circle cx="16" cy="16" r="11.5" stroke="#f59e0b" stroke-width="2.4"/>
+                  <path d="M5.5 14.5H11.5M20.5 14.5H26.5M16 20.5V27.5" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round"/>
+                  <rect x="12" y="11" width="8" height="8" rx="1.8" fill="#10b981"/>
+                  <path d="M14 8.5V11M18 8.5V11M14 19V21.5M18 19V21.5" stroke="#10b981" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+            <div class="leading-tight">
+              <span class="block text-lg font-extrabold tracking-tight text-white">ЭУР-<span class="text-amberdash">Мастер</span></span>
+              <span class="block text-[11px] text-slate-400">Ремонт ЭУР и блоков ЭБУ</span>
+            </div>
+          </a>
+
+          <!-- Кликабельный бейдж с адресом в шапке -->
+          <a href="#contacts" class="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dash-surface border border-slate-700/80 hover:border-amberdash/60 text-xs font-semibold text-slate-200 hover:text-amber-300 transition shrink-0" title="Открыть адрес и схему проезда">
+            <svg class="w-3.5 h-3.5 text-amberdash shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span>ул. Самаркандская, 1/4</span>
+          </a>
+        </div>
+
+        <!-- Навигация (десктоп) -->
+        <nav class="hidden lg:flex items-center gap-5 text-[13.5px] font-semibold text-slate-300" aria-label="Основная навигация">
+          <a href="#ecu-repair" class="hover:text-amberdash transition">Пайка блоков</a>
+          <a href="#brands" class="hover:text-amberdash transition">Марки авто</a>
+          <a href="#calculator" class="hover:text-amberdash transition">Калькулятор</a>
+          <a href="#prices" class="hover:text-amberdash transition">Цены</a>
+          <a href="#faq" class="hover:text-amberdash transition">FAQ</a>
+          <a href="#contacts" class="hover:text-amberdash transition">Контакты</a>
+        </nav>
+
+        <!-- Оба телефона + кнопка записи (десктоп) -->
+        <div class="hidden lg:flex items-center gap-3 shrink-0">
+          <div class="flex flex-col items-end leading-snug">
+            <a href="tel:+79638999767" class="inline-flex items-center gap-1.5 font-mono text-[13px] font-bold text-white hover:text-amberdash transition">
+              <svg class="w-3.5 h-3.5 text-amberdash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              +7 (963) 899-97-67
+            </a>
+            <a href="tel:+79965820805" class="font-mono text-[12px] font-semibold text-slate-300 hover:text-emeralddash transition">
+              +7 (996) 582-08-05
+            </a>
+          </div>
+          <a href="#booking-block" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 font-bold text-[13.5px] shadow-amberGlow hover:brightness-110 transition">
+            Записаться
+          </a>
+        </div>
+
+        <!-- Мобильные кнопки управления -->
+        <div class="flex lg:hidden items-center gap-2">
+          <a href="#contacts" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-2 rounded-xl bg-dash-surface border border-slate-700/80 text-xs font-semibold text-slate-200">
+            <svg class="w-3.5 h-3.5 text-amberdash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Самаркандская, 1/4
+          </a>
+          <a href="tel:+79638999767" class="w-11 h-11 rounded-xl bg-dash-surface border border-amberdash/40 text-amberdash flex items-center justify-center" aria-label="Позвонить +7 (963) 899-97-67">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </a>
+          <button type="button" id="burger-btn" class="w-11 h-11 rounded-xl bg-dash-surface border border-slate-700 text-white flex items-center justify-center" aria-label="Открыть меню" aria-expanded="false">
+            <svg id="burger-icon-open" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <svg id="burger-icon-close" class="w-5 h-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Выпадающее мобильное меню -->
+    <div id="mobile-menu" class="hidden lg:hidden bg-dash-surface border-t border-slate-800 px-4 pt-4 pb-6">
+      <div class="grid gap-1.5 mb-4">
+        <a href="#ecu-repair" class="m-link px-3.5 py-3 rounded-xl bg-dash-base/60 text-slate-100 font-semibold text-[15px] hover:bg-dash-elevated hover:text-amberdash transition">Компонентный ремонт блоков</a>
+        <a href="#brands" class="m-link px-3.5 py-3 rounded-xl bg-dash-base/60 text-slate-100 font-semibold text-[15px] hover:bg-dash-elevated hover:text-amberdash transition">Марки авто и СДЭК</a>
+        <a href="#calculator" class="m-link px-3.5 py-3 rounded-xl bg-dash-base/60 text-slate-100 font-semibold text-[15px] hover:bg-dash-elevated hover:text-amberdash transition">Калькулятор стоимости</a>
+        <a href="#prices" class="m-link px-3.5 py-3 rounded-xl bg-dash-base/60 text-slate-100 font-semibold text-[15px] hover:bg-dash-elevated hover:text-amberdash transition">Цены и этапы работы</a>
+        <a href="#faq" class="m-link px-3.5 py-3 rounded-xl bg-dash-base/60 text-slate-100 font-semibold text-[15px] hover:bg-dash-elevated hover:text-amberdash transition">Частые вопросы (FAQ)</a>
+        <a href="#contacts" class="m-link px-3.5 py-3 rounded-xl bg-dash-base/60 text-slate-100 font-semibold text-[15px] hover:bg-dash-elevated hover:text-amberdash transition">Контакты и схема проезда</a>
+      </div>
+
+      <!-- Полный адрес и оба телефона в мобильном меню -->
+      <div class="pt-4 border-t border-slate-800 space-y-2.5">
+        <a href="#contacts" class="m-link flex items-center gap-2.5 px-3.5 py-3 rounded-xl bg-amberdash/10 border border-amberdash/35 text-amber-200 text-sm font-semibold">
+          <svg class="w-4 h-4 text-amberdash shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>г. Уфа, ул. Самаркандская, 1/4</span>
+        </a>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <a href="tel:+79638999767" class="flex items-center justify-center gap-2 px-3.5 py-3 rounded-xl bg-dash-base border border-slate-700 font-mono font-bold text-sm text-white">
+            +7 (963) 899-97-67
+          </a>
+          <a href="tel:+79965820805" class="flex items-center justify-center gap-2 px-3.5 py-3 rounded-xl bg-dash-base border border-slate-700 font-mono font-bold text-sm text-white">
+            +7 (996) 582-08-05
+          </a>
+        </div>
+        <a href="#booking-block" class="m-link flex items-center justify-center w-full py-3.5 rounded-xl bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 font-bold text-sm shadow-amberGlow">
+          Записаться на диагностику
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ===================== 2. HERO + ИСПРАВЛЕННЫЙ EPS DASHBOARD ===================== -->
+    <section class="relative py-12 lg:py-20 dash-grid border-b border-slate-800/80 overflow-hidden">
+      <!-- Декоративное свечение -->
+      <div class="pointer-events-none absolute -top-28 -left-24 w-96 h-96 rounded-full bg-amberdash/15 blur-[120px]"></div>
+      <div class="pointer-events-none absolute -bottom-32 -right-24 w-96 h-96 rounded-full bg-emeralddash/10 blur-[120px]"></div>
+
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-10 items-center">
+
+          <!-- Левая колонка Hero -->
+          <div class="lg:col-span-6">
+            <!-- Плашка с адресом и СДЭК -->
+            <a href="#contacts" class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-dash-surface border border-slate-700/90 hover:border-amberdash/60 text-xs sm:text-[13px] font-semibold text-amber-200 mb-6 transition">
+              <span class="w-2.5 h-2.5 rounded-full bg-amberdash pulse-amber shrink-0"></span>
+              <span>г. Уфа, ул. Самаркандская, 1/4 • Приём блоков через СДЭК</span>
+            </a>
+
+            <h1 class="text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight text-white leading-[1.13] mb-5">
+              Ремонт ЭУР и
+              <span class="bg-gradient-to-r from-amber-300 via-amberdash-hot to-emeralddash bg-clip-text text-transparent">компонентная пайка электронных блоков ЭБУ</span>
+              для всех марок авто
+            </h1>
+
+            <p class="text-base sm:text-[17px] text-slate-300 leading-relaxed max-w-2xl mb-6">
+              Восстанавливаем электроусилители руля (ЭУР), рулевые колонки с ЭУР и электронные блоки управления (ЭБУ ЭУР): паяем <strong class="text-white">силовые ключи MOSFET, силовые реле, драйверы, процессоры и SMD-компоненты</strong> под микроскопом. Проверяем каждый узел на нагрузочном стенде.
+            </p>
+
+            <!-- Стартовая цена строго в формате «от 5 000 ₽» -->
+            <div class="inline-flex flex-wrap items-center gap-3 px-4 py-3 rounded-2xl bg-dash-surface border border-amberdash/35 mb-7">
+              <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Стоимость ремонта:</span>
+              <span class="font-mono text-xl sm:text-2xl font-extrabold text-amberdash">от 5 000 ₽</span>
+              <span class="text-xs text-emeralddash font-semibold">• Гарантия 12 мес.</span>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="flex flex-col sm:flex-row flex-wrap gap-3.5 mb-7">
+              <a href="#calculator" class="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 min-h-[50px] rounded-2xl bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 font-bold text-[15px] shadow-amberGlow hover:brightness-110 transition">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8.01" y2="10"/><line x1="12" y1="10" x2="12.01" y2="10"/><line x1="16" y1="10" x2="16.01" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="16" y1="14" x2="16.01" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+                Рассчитать стоимость
+              </a>
+              <a href="#booking-block" class="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 min-h-[50px] rounded-2xl bg-dash-surface border border-slate-700 hover:border-amberdash/60 text-white hover:text-amber-300 font-bold text-[15px] transition">
+                <svg class="w-5 h-5 text-amberdash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Записаться на диагностику
+              </a>
+            </div>
+
+            <!-- Оба кликабельных телефона -->
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-400">
+              <span class="font-medium">Позвонить мастеру:</span>
+              <a href="tel:+79638999767" class="inline-flex items-center gap-1.5 font-mono font-bold text-slate-100 hover:text-amberdash transition">
+                <span class="w-2 h-2 rounded-full bg-amberdash"></span>
+                +7 (963) 899-97-67
+              </a>
+              <a href="tel:+79965820805" class="inline-flex items-center gap-1.5 font-mono font-bold text-slate-100 hover:text-emeralddash transition">
+                <span class="w-2 h-2 rounded-full bg-emeralddash"></span>
+                +7 (996) 582-08-05
+              </a>
+            </div>
+          </div>
+
+          <!-- Правая колонка Hero: Интерактивная приборная панель EPS Dashboard (БЕЗ конкурирующего клика на контейнере) -->
+          <div class="lg:col-span-6">
+            <div id="eps-panel" class="rounded-[26px] bg-gradient-to-b from-dash-elevated via-dash-surface to-dash-base border-2 border-red-500/45 p-5 sm:p-6 shadow-[0_24px_60px_rgba(0,0,0,0.6),0_0_40px_rgba(239,68,68,0.14)] transition-all duration-300">
+
+              <!-- Верхняя строка статуса и мигающий бейдж -->
+              <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-800">
+                <div class="flex items-center gap-2 font-mono text-[11px] font-semibold tracking-wider text-slate-400">
+                  <span id="eps-led" class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.95)] blink-alert"></span>
+                  <span>EPS BENCH • TELEMETRY</span>
+                </div>
+
+                <!-- Статусный бейдж -->
+                <div id="eps-status-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/15 border border-red-500/50 text-red-400 font-mono text-[11px] font-bold tracking-wide blink-alert transition-all duration-300">
+                  EPS ERROR — АВАРИЙНЫЙ РЕЖИМ
+                </div>
+              </div>
+
+              <!-- Панель переключения: До ремонта | [Тумблер] | После ремонта -->
+              <div class="flex items-center justify-center gap-2 sm:gap-3 p-2.5 rounded-2xl bg-dash-base border border-slate-800 mb-5">
+                <button type="button" id="eps-btn-before" class="flex-1 min-h-[42px] px-3 py-2 rounded-xl text-xs sm:text-[13px] font-bold bg-red-500/20 text-red-300 border border-red-500/50 transition cursor-pointer">
+                  До ремонта
+                </button>
+
+                <!-- Главный переключатель role="switch" -->
+                <button type="button" id="eps-toggle-btn" role="switch" aria-checked="false" aria-label="Переключить состояние ЭУР до и после ремонта" class="relative shrink-0 w-16 h-9 rounded-full bg-red-500/25 border-2 border-red-500/70 p-1 transition-colors duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amberdash">
+                  <span id="eps-thumb" class="block w-6 h-6 rounded-full bg-red-400 shadow-md transform translate-x-0 transition-all duration-300"></span>
+                </button>
+
+                <button type="button" id="eps-btn-after" class="flex-1 min-h-[42px] px-3 py-2 rounded-xl text-xs sm:text-[13px] font-bold bg-transparent text-slate-400 border border-transparent hover:text-emerald-300 transition cursor-pointer">
+                  После ремонта
+                </button>
+              </div>
+
+              <!-- Средняя часть: Циферблат + Визуальная шкала / осциллограмма -->
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center mb-5">
+                <!-- Циферблат EPS -->
+                <div class="sm:col-span-5 flex justify-center">
+                  <div id="eps-dial" class="relative w-44 h-44 rounded-full bg-dash-base border-[3px] border-red-500/55 shadow-[inset_0_0_32px_rgba(0,0,0,0.92),0_0_28px_rgba(239,68,68,0.2)] flex flex-col items-center justify-center transition-all duration-300">
+                    <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 220 220" aria-hidden="true">
+                      <circle cx="110" cy="110" r="96" fill="none" stroke="rgba(148,163,184,0.14)" stroke-width="5" stroke-dasharray="3 8"/>
+                      <circle id="eps-arc" cx="110" cy="110" r="96" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="155 610" transform="rotate(-210 110 110)" style="transition: stroke 0.35s ease, stroke-dasharray 0.45s ease;"/>
+                    </svg>
+
+                    <div id="eps-icon-wrap" class="eps-glow-err">
+                      <svg width="96" height="72" viewBox="0 0 144 108" fill="none" aria-hidden="true">
+                        <circle id="svg-wheel-ring" cx="56" cy="54" r="34" stroke="#ef4444" stroke-width="8" style="transition: stroke 0.3s ease;"/>
+                        <circle id="svg-wheel-hub" cx="56" cy="54" r="8.5" fill="#ef4444" style="transition: fill 0.3s ease;"/>
+                        <path id="svg-wheel-spokes" d="M24 47H47M65 47H88M56 63V88" stroke="#ef4444" stroke-width="7.5" stroke-linecap="round" style="transition: stroke 0.3s ease;"/>
+                        <!-- Восклицательный знак (Авария) -->
+                        <g id="svg-excl" style="transition: opacity 0.25s ease; opacity: 1;">
+                          <rect x="109" y="21" width="11" height="40" rx="5.5" fill="#ef4444"/>
+                          <circle cx="114.5" cy="75" r="6.5" fill="#f59e0b"/>
+                        </g>
+                        <!-- Зелёная галочка (Норма) -->
+                        <g id="svg-check" style="transition: opacity 0.25s ease; opacity: 0;">
+                          <circle cx="114" cy="54" r="18" fill="rgba(16,185,129,0.18)" stroke="#10b981" stroke-width="3"/>
+                          <path d="M105 54L111.5 60.5L123.5 47.5" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </g>
+                      </svg>
+                    </div>
+
+                    <div id="eps-dial-label" class="font-mono text-xs font-bold text-red-400 tracking-wider mt-0.5">EPS ERROR</div>
+                  </div>
+                </div>
+
+                <!-- Прогресс-бары и осциллограмма датчика момента / MOSFET -->
+                <div class="sm:col-span-7 space-y-3">
+                  <!-- Осциллограмма сигнала датчика момента -->
+                  <div class="rounded-xl bg-dash-base border border-slate-800 p-3">
+                    <div class="flex items-center justify-between text-[11px] font-mono mb-1.5">
+                      <span class="text-slate-400 uppercase">Сигнал датчика момента</span>
+                      <span id="eps-wave-status" class="font-bold text-red-400">ОБРЫВ / ШУМ</span>
+                    </div>
+                    <svg class="w-full h-11" viewBox="0 0 260 44" fill="none" aria-hidden="true">
+                      <line x1="0" y1="22" x2="260" y2="22" stroke="rgba(148,163,184,0.18)" stroke-dasharray="3 4"/>
+                      <path id="eps-wave-path" d="M2 22 L28 22 L38 7 L49 38 L62 11 L75 35 L92 22 L120 22 L134 5 L146 40 L160 15 L178 22 L258 22" stroke="#ef4444" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transition: all 0.4s ease;"/>
+                    </svg>
+                  </div>
+
+                  <!-- Прогресс-бар 1: Силовой каскад MOSFET -->
+                  <div class="rounded-xl bg-dash-base border border-slate-800 p-3">
+                    <div class="flex items-center justify-between text-[11px] font-mono mb-1.5">
+                      <span class="text-slate-400">Силовой каскад MOSFET</span>
+                      <span id="eps-bar-mosfet-val" class="font-bold text-red-400">12% (КЗ / ПРОБОЙ)</span>
+                    </div>
+                    <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                      <div id="eps-bar-mosfet" class="h-full rounded-full bg-gradient-to-r from-red-500 to-amberdash transition-all duration-500" style="width: 12%;"></div>
+                    </div>
+                  </div>
+
+                  <!-- Прогресс-бар 2: Ресурс датчика и реле -->
+                  <div class="rounded-xl bg-dash-base border border-slate-800 p-3">
+                    <div class="flex items-center justify-between text-[11px] font-mono mb-1.5">
+                      <span class="text-slate-400">Стабильность цепи питания</span>
+                      <span id="eps-bar-power-val" class="font-bold text-amber-400">18% (ПРОСАДКА)</span>
+                    </div>
+                    <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                      <div id="eps-bar-power" class="h-full rounded-full bg-gradient-to-r from-amberdash to-red-500 transition-all duration-500" style="width: 18%;"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 6 параметров телеметрии ЭБУ ЭУР -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-mono">
+                <div class="rounded-xl bg-dash-base border border-slate-800 px-3 py-2.5">
+                  <span id="tel-dtc-lbl" class="block text-[10px] uppercase text-slate-500">Ошибки</span>
+                  <span id="tel-dtc-val" class="block text-xs font-bold text-amber-300 mt-0.5">C1290 / U0131 / 00573</span>
+                </div>
+                <div class="rounded-xl bg-dash-base border border-slate-800 px-3 py-2.5">
+                  <span class="block text-[10px] uppercase text-slate-500">Ключи MOSFET</span>
+                  <span id="tel-mosfet-val" class="block text-xs font-bold text-red-400 mt-0.5">ПРОБОЙ</span>
+                </div>
+                <div class="rounded-xl bg-dash-base border border-slate-800 px-3 py-2.5">
+                  <span class="block text-[10px] uppercase text-slate-500">Силовое реле</span>
+                  <span id="tel-relay-val" class="block text-xs font-bold text-amber-400 mt-0.5">ОБРЫВ / ПОДГАР</span>
+                </div>
+                <div class="rounded-xl bg-dash-base border border-slate-800 px-3 py-2.5">
+                  <span class="block text-[10px] uppercase text-slate-500">Усилие на руле</span>
+                  <span id="tel-effort-val" class="block text-xs font-bold text-red-400 mt-0.5">9.4 Н·м (тугой руль)</span>
+                </div>
+                <div class="rounded-xl bg-dash-base border border-slate-800 px-3 py-2.5">
+                  <span id="tel-current-lbl" class="block text-[10px] uppercase text-slate-500">Ток покоя / нагрузка</span>
+                  <span id="tel-current-val" class="block text-xs font-bold text-amber-400 mt-0.5">0.0 А (блокировка ЭБУ)</span>
+                </div>
+                <div class="rounded-xl bg-dash-base border border-slate-800 px-3 py-2.5">
+                  <span class="block text-[10px] uppercase text-slate-500">Напряжение</span>
+                  <span id="tel-voltage-val" class="block text-xs font-bold text-amber-400 mt-0.5">11.8 В</span>
+                </div>
+              </div>
+
+              <!-- Подсказка снизу -->
+              <div class="mt-4 pt-3.5 border-t border-slate-800 flex items-center justify-between gap-2 text-xs text-slate-400">
+                <span id="eps-foot-hint">Нажмите на переключатель, чтобы увидеть результат после ремонта</span>
+                <span id="eps-foot-tag" class="font-mono font-bold text-amberdash shrink-0">ДО РЕМОНТА</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 доверительных показателя -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
+          <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-dash-surface/90 border border-slate-800">
+            <div class="w-11 h-11 rounded-xl bg-emeralddash/15 border border-emeralddash/35 text-emeralddash flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <div>
+              <div class="font-bold text-sm text-white">Гарантия 12 месяцев</div>
+              <div class="text-xs text-slate-400">На пайку, компоненты и узлы</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-dash-surface/90 border border-slate-800">
+            <div class="w-11 h-11 rounded-xl bg-amberdash/15 border border-amberdash/35 text-amberdash flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>
+            </div>
+            <div>
+              <div class="font-bold text-sm text-white">Пайка под микроскопом</div>
+              <div class="text-xs text-slate-400">MOSFET, реле, драйверы, SMD</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-dash-surface/90 border border-slate-800">
+            <div class="w-11 h-11 rounded-xl bg-amberdash/15 border border-amberdash/35 text-amberdash flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div>
+              <div class="font-bold text-sm text-white">Нагрузочный стенд</div>
+              <div class="text-xs text-slate-400">Имитация CAN, токов и нагрева</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-dash-surface/90 border border-slate-800">
+            <div class="w-11 h-11 rounded-xl bg-emeralddash/15 border border-emeralddash/35 text-emeralddash flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            </div>
+            <div>
+              <div class="font-bold text-sm text-white">Уфа и вся РФ (СДЭК)</div>
+              <div class="text-xs text-slate-400">Видеоотчёт со стенда до оплаты</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 3. КОМПОНЕНТНЫЙ РЕМОНТ БЛОКОВ ЭУР (ЭБУ) ===================== -->
+    <section id="ecu-repair" class="py-16 lg:py-20 bg-[#0e131d] border-b border-slate-800/80">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto text-center mb-12">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amberdash/15 border border-amberdash/40 text-amber-300 text-xs font-bold uppercase tracking-wider mb-3">
+            Электроника на уровне компонентов
+          </span>
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+            Компонентный ремонт блоков ЭУР (ЭБУ)
+          </h2>
+          <p class="mt-3 text-slate-400 text-base">
+            Вместо покупки дорогого нового или «уставшего» б/у блока находим неисправный элемент на плате, перепаиваем на качественные компоненты с запасом по току и проверяем на нагрузочном стенде.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Карточка 1 -->
+          <article class="rounded-2xl bg-dash-surface border border-slate-800 hover:border-amberdash/50 p-6 transition hover:-translate-y-1">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-amberdash/15 border border-amberdash/35 text-amberdash flex items-center justify-center">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="4" width="14" height="11" rx="2"/><line x1="8" y1="15" x2="8" y2="21"/><line x1="12" y1="15" x2="12" y2="21"/><line x1="16" y1="15" x2="16" y2="21"/><circle cx="12" cy="9.5" r="2"/></svg>
+              </div>
+              <span class="font-mono text-[11px] font-bold px-2.5 py-1 rounded-lg bg-dash-base border border-slate-800 text-slate-400">MOSFET</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Перепайка силовых ключей MOSFET</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Меняем пробитые и перегретые силовые транзисторы инвертора на оригинальные аналоги с увеличенным запасом по току и теплоотводу. Устраняем КЗ и обрыв фаз электромотора ЭУР.
+            </p>
+          </article>
+
+          <!-- Карточка 2 -->
+          <article class="rounded-2xl bg-dash-surface border border-slate-800 hover:border-amberdash/50 p-6 transition hover:-translate-y-1">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-amberdash/15 border border-amberdash/35 text-amberdash flex items-center justify-center">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 12h3l2-3 2 6 2-3h1"/></svg>
+              </div>
+              <span class="font-mono text-[11px] font-bold px-2.5 py-1 rounded-lg bg-dash-base border border-slate-800 text-slate-400">RELAY</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Замена силовых реле питания</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Устраняем подгорание контактов и высокое переходное сопротивление силового реле — главную причину, по которой усилитель внезапно отключается на ходу, на кочках или на горячую.
+            </p>
+          </article>
+
+          <!-- Карточка 3 -->
+          <article class="rounded-2xl bg-dash-surface border border-slate-800 hover:border-amberdash/50 p-6 transition hover:-translate-y-1">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-amberdash/15 border border-amberdash/35 text-amberdash flex items-center justify-center">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg>
+              </div>
+              <span class="font-mono text-[11px] font-bold px-2.5 py-1 rounded-lg bg-dash-base border border-slate-800 text-slate-400">SMD &amp; IC</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Драйверы, процессоры и SMD под микроскопом</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Точечная замена драйверов затворов, CAN-трансиверов, процессоров, стабилизаторов питания, SMD-резисторов, конденсаторов и защитных диодов на профессиональной паяльной станции.
+            </p>
+          </article>
+
+          <!-- Карточка 4 -->
+          <article class="rounded-2xl bg-dash-surface border border-slate-800 hover:border-amberdash/50 p-6 transition hover:-translate-y-1">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-amberdash/15 border border-amberdash/35 text-amberdash flex items-center justify-center">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/><path d="M9 14l2 2 4-4"/></svg>
+              </div>
+              <span class="font-mono text-[11px] font-bold px-2.5 py-1 rounded-lg bg-dash-base border border-slate-800 text-slate-400">PCB</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Восстановление дорожек после влаги и КЗ</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Ультразвуковая очистка платы от окислов, восстановление выгоревших силовых и сигнальных дорожек, межслойных переходов, исправление после переполюсовки и защитное лакирование.
+            </p>
+          </article>
+
+          <!-- Карточка 5 -->
+          <article class="rounded-2xl bg-dash-surface border border-slate-800 hover:border-emeralddash/50 p-6 transition hover:-translate-y-1">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-emeralddash/15 border border-emeralddash/35 text-emeralddash flex items-center justify-center">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+              </div>
+              <span class="font-mono text-[11px] font-bold px-2.5 py-1 rounded-lg bg-dash-base border border-slate-800 text-slate-400">TORQUE</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Ремонт и калибровка датчиков момента</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Восстановление оптических и бесконтактных датчиков крутящего момента и положения ротора, устранение рывков, закусывания и разницы усилия влево/вправо, выставление «нуля» руля.
+            </p>
+          </article>
+
+          <!-- Карточка 6 -->
+          <article class="rounded-2xl bg-dash-surface border border-slate-800 hover:border-emeralddash/50 p-6 transition hover:-translate-y-1">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-emeralddash/15 border border-emeralddash/35 text-emeralddash flex items-center justify-center">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+              <span class="font-mono text-[11px] font-bold px-2.5 py-1 rounded-lg bg-dash-base border border-slate-800 text-slate-400">BENCH</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Финальный прогон на нагрузочном стенде</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Испытываем каждый отремонтированный блок ЭБУ ЭУР с имитацией CAN-шины и дорожной нагрузки, замеряем рабочие токи и контролируем нагрев силовых ключей перед выдачей клиенту.
+            </p>
+          </article>
+        </div>
+
+        <!-- Плашка преимущества родного блока -->
+        <div class="mt-7 rounded-2xl bg-gradient-to-r from-amberdash/10 via-dash-surface to-emeralddash/10 border border-amberdash/35 p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h4 class="text-base sm:text-lg font-bold text-white">Родной блок ЭБУ ЭУР сохраняет все заводские кодировки и VIN</h4>
+            <p class="text-sm text-slate-300 mt-1">Не нужно искать совместимого донора или переплачивать за привязку — после компонентной пайки блок устанавливается обратно и сразу работает.</p>
+          </div>
+          <a href="#calculator" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 font-bold text-sm shrink-0 shadow-amberGlow hover:brightness-110 transition">
+            Оценить ремонт блока →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 4. ВСЕ МАРКИ АВТОМОБИЛЕЙ + МГНОВЕННЫЙ ПОИСК ===================== -->
+    <section id="brands" class="py-16 lg:py-20 bg-dash-base border-b border-slate-800/80">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
+          <div class="max-w-2xl">
+            <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amberdash/15 border border-amberdash/40 text-amber-300 text-xs font-bold uppercase tracking-wider mb-3">
+              Все марки и модели
+            </span>
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+              Все марки автомобилей
+            </h2>
+            <p class="mt-2.5 text-slate-400 text-base">
+              Ремонтируем электроусилители руля, рулевые колонки с ЭУР и блоки ЭБУ Mando, Bosch, TRW, JTEKT, NSK, Showa, Автоэлектроника (Калуга), Авиаагрегат (Махачкала) и др.
+            </p>
+          </div>
+
+          <!-- Поле живого поиска -->
+          <div class="relative w-full lg:w-96">
+            <svg class="w-4 h-4 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="brand-search" class="w-full h-12 pl-11 pr-10 rounded-2xl bg-dash-input border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amberdash focus:ring-2 focus:ring-amberdash/20 transition" placeholder="Поиск марки или модели (Solaris, Vesta, Polo...)" aria-label="Поиск марки или модели автомобиля">
+            <button type="button" id="brand-search-clear" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg text-slate-400 hover:text-white flex items-center justify-center" aria-label="Очистить поиск">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Контейнер результатов мгновенного поиска -->
+        <div id="search-results" class="hidden mb-6 p-5 rounded-2xl bg-dash-input border border-amberdash/45">
+          <div class="flex items-center justify-between gap-2 mb-3.5">
+            <span id="search-results-count" class="font-mono text-xs uppercase text-amberdash font-bold">Результаты поиска</span>
+            <button type="button" id="search-reset-btn" class="text-xs text-slate-400 underline hover:text-white">Сбросить</button>
+          </div>
+          <div id="search-results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- 6 переключаемых вкладок -->
+        <div class="flex flex-wrap gap-2.5 mb-6" role="tablist" aria-label="Категории производителей">
+          <button type="button" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-bold border transition" role="tab" aria-selected="true" data-tab="korea">Корея</button>
+          <button type="button" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-bold border transition" role="tab" aria-selected="false" data-tab="lada">Отечественные / Lada</button>
+          <button type="button" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-bold border transition" role="tab" aria-selected="false" data-tab="europe">Европа и VAG</button>
+          <button type="button" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-bold border transition" role="tab" aria-selected="false" data-tab="japan_usa">Япония и США</button>
+          <button type="button" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-bold border transition" role="tab" aria-selected="false" data-tab="china_ev">Китай и Электромобили</button>
+          <button type="button" class="tab-btn tab-cdek px-4 py-2.5 rounded-xl text-sm font-bold border transition" role="tab" aria-selected="false" data-tab="cdek">Доставка СДЭК</button>
+        </div>
+
+        <!-- Панель содержимого вкладок -->
+        <div class="rounded-[26px] bg-dash-surface border border-slate-800 p-6 sm:p-8 shadow-panel">
+
+          <!-- 1. Корея -->
+          <div id="panel-korea" class="tab-panel grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-7">
+              <div class="font-mono text-xs uppercase text-amberdash font-semibold mb-2">● Системы MDPS • Mando • Mobis</div>
+              <h3 class="text-2xl font-extrabold text-white mb-3">Корейские автомобили (Hyundai, Kia, Genesis)</h3>
+              <p class="text-slate-300 text-[15px] mb-5">
+                Устраняем типовые поломки корейских ЭУР: компонентный ремонт блока управления MDPS (реле, ключи MOSFET, драйверы), ошибки датчика момента и стук эластичной муфты в рулевой колонке с ЭУР.
+              </p>
+              <div class="flex flex-wrap gap-2 mb-5">
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="korea" data-brand="Hyundai Solaris">Hyundai Solaris</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="korea" data-brand="Hyundai Creta">Hyundai Creta</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="korea" data-brand="Hyundai Elantra">Hyundai Elantra</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="korea" data-brand="Kia Rio">Kia Rio</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="korea" data-brand="Kia Ceed">Kia Ceed</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="korea" data-brand="Kia Sportage">Kia Sportage</button>
+              </div>
+              <ul class="space-y-2.5 text-sm text-slate-300">
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> Перепайка силовых реле, ключей MOSFET и драйверов в блоке MDPS.</li>
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> Устранение ошибок C1259, C1260, C1290, C1611, ремонт датчика момента и калибровка «нуля».</li>
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> Замена демпферной муфты и подшипников рулевой колонки с ЭУР.</li>
+              </ul>
+            </div>
+            <div class="lg:col-span-5 rounded-2xl bg-dash-input border border-slate-800 p-5 space-y-3.5">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <span class="font-mono text-xs uppercase text-slate-400">Сводка • Корея</span>
+                <span class="px-2.5 py-1 rounded-full bg-emeralddash/15 text-emeralddash text-xs font-bold">Запчасти в наличии</span>
+              </div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Типовые коды:</span><strong class="font-mono text-amberdash">C1259 / C1260 / C1290</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Ремонт блока ЭУР:</span><strong class="text-white">от 5 000 ₽ (2–4 ч)</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Колонка ЭУР / муфта:</span><strong class="text-white">от 5 000 ₽ (1.5–2 ч)</strong></div>
+              <button type="button" class="jump-calc-btn w-full py-3 rounded-xl bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 font-bold text-sm shadow-amberGlow hover:brightness-110 transition" data-cat="korea" data-unit="ecu" data-brand="Hyundai / Kia">
+                Рассчитать ремонт Hyundai / Kia →
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Отечественные / Lada -->
+          <div id="panel-lada" class="tab-panel hidden grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-7">
+              <div class="font-mono text-xs uppercase text-amberdash font-semibold mb-2">● Махачкала • Калуга (Автоэлектроника) • Mando</div>
+              <h3 class="text-2xl font-extrabold text-white mb-3">Отечественные автомобили / Lada (все модификации)</h3>
+              <p class="text-slate-300 text-[15px] mb-5">
+                Ремонтируем электроусилители руля и электронные блоки управления для всех моделей и годов выпуска Lada — любых заводов-производителей.
+              </p>
+              <div class="flex flex-wrap gap-2 mb-5">
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="lada" data-brand="Lada Granta">Lada Granta</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="lada" data-brand="Lada Priora">Lada Priora</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="lada" data-brand="Lada Kalina">Lada Kalina</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="lada" data-brand="Lada Vesta">Lada Vesta</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="lada" data-brand="Lada Niva">Lada Niva</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="lada" data-brand="Lada Largus / XRAY">Largus / XRAY</button>
+              </div>
+              <ul class="space-y-2.5 text-sm text-slate-300">
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> <strong class="text-white">Махачкала (Авиаагрегат):</strong> замена оптопар, датчика положения ротора (C1041–C1058), пайка ключей инвертора.</li>
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> <strong class="text-white">Калуга (Автоэлектроника):</strong> замена силовых реле и MOSFET-транзисторов, восстановление платы и датчика момента.</li>
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> <strong class="text-white">Mando (Vesta / Granta FL):</strong> компонентный ремонт блока ЭБУ ЭУР, сброс ошибок и прогон на стенде.</li>
+              </ul>
+            </div>
+            <div class="lg:col-span-5 rounded-2xl bg-dash-input border border-slate-800 p-5 space-y-3.5">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <span class="font-mono text-xs uppercase text-slate-400">Сводка • Lada</span>
+                <span class="px-2.5 py-1 rounded-full bg-emeralddash/15 text-emeralddash text-xs font-bold">Все заводы ЭУР</span>
+              </div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Типовые коды:</span><strong class="font-mono text-amberdash">C1041–C1058, C1074</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Махачкала / Калуга:</span><strong class="text-white">от 5 000 ₽ (2–3 ч)</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Mando (Vesta / XRAY):</span><strong class="text-white">от 5 500 ₽ (2.5–4 ч)</strong></div>
+              <button type="button" class="jump-calc-btn w-full py-3 rounded-xl bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 font-bold text-sm shadow-amberGlow hover:brightness-110 transition" data-cat="lada" data-unit="ecu" data-brand="Lada">
+                Рассчитать ремонт Lada →
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. Европа и VAG -->
+          <div id="panel-europe" class="tab-panel hidden grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-7">
+              <div class="font-mono text-xs uppercase text-amberdash font-semibold mb-2">● Блоки Bosch • TRW • NSK • Valeo</div>
+              <h3 class="text-2xl font-extrabold text-white mb-3">Европейские автомобили и группа VAG</h3>
+              <p class="text-slate-300 text-[15px] mb-5">
+                Восстанавливаем электронные блоки управления ЭУР после пробоя силового каскада, попадания влаги, просадок АКБ и программных блокировок («красный руль» на панели).
+              </p>
+              <div class="flex flex-wrap gap-2 mb-5">
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="europe" data-brand="VW Polo / Golf">VW Polo / Golf</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="europe" data-brand="Skoda Rapid / Octavia">Skoda Rapid / Octavia</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="europe" data-brand="Renault">Renault</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="europe" data-brand="BMW">BMW</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="europe" data-brand="Mercedes-Benz">Mercedes-Benz</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="europe" data-brand="Audi">Audi</button>
+              </div>
+              <ul class="space-y-2.5 text-sm text-slate-300">
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> Пайка силовых ключей MOSFET, драйверов и процессоров на многослойных платах Bosch / TRW / NSK.</li>
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> Устранение ошибок 00573, 00003, B2000, U3000 («красный руль») без замены блока.</li>
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> Восстановление CAN-шины и залитых плат ЭБУ ЭУР с сохранением штатных кодировок.</li>
+              </ul>
+            </div>
+            <div class="lg:col-span-5 rounded-2xl bg-dash-input border border-slate-800 p-5 space-y-3.5">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <span class="font-mono text-xs uppercase text-slate-400">Сводка • Европа / VAG</span>
+                <span class="px-2.5 py-1 rounded-full bg-emeralddash/15 text-emeralddash text-xs font-bold">Убираем красный руль</span>
+              </div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Типовые коды:</span><strong class="font-mono text-amberdash">00573 / 00003 / U3000</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Пайка блока ЭУР:</span><strong class="text-white">от 7 000 ₽ (3–5 ч)</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">После влаги / КЗ:</span><strong class="text-white">от 8 500 ₽ (1 рабочий день)</strong></div>
+              <button type="button" class="jump-calc-btn w-full py-3 rounded-xl bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 font-bold text-sm shadow-amberGlow hover:brightness-110 transition" data-cat="europe" data-unit="ecu" data-brand="Европа / VAG">
+                Рассчитать ремонт Европа / VAG →
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. Япония и США -->
+          <div id="panel-japan_usa" class="tab-panel hidden grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-7">
+              <div class="font-mono text-xs uppercase text-amberdash font-semibold mb-2">● Системы JTEKT • NSK • Showa • FoMoCo</div>
+              <h3 class="text-2xl font-extrabold text-white mb-3">Японские и американские автомобили</h3>
+              <p class="text-slate-300 text-[15px] mb-5">
+                Решаем проблемы отключения ЭУР на горячую, перегорания силовых реле и ключей, ошибок датчиков момента и отсутствия связи с блоком управления.
+              </p>
+              <div class="flex flex-wrap gap-2 mb-5">
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="japan_usa" data-brand="Toyota">Toyota</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="japan_usa" data-brand="Honda">Honda</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="japan_usa" data-brand="Nissan">Nissan</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="japan_usa" data-brand="Mazda">Mazda</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-cat="japan_usa" data-brand="Mitsubishi">Mitsubishi</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="japan_usa" data-brand="Ford">Ford</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="japan_usa" data-brand="Chevrolet">Chevrolet</button>
+              </div>
+              <ul class="space-y-2.5 text-sm text-slate-300">
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> Замена силовых реле и ключей в блоках Toyota / Honda / Nissan / Ford при отключении на горячую.</li>
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> Устранение ошибок C1555, C1515, U3000, пайка силового каскада и цепей питания платы ЭУР.</li>
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> Ремонт и калибровка датчиков момента и механизмов рулевых колонок с ЭУР.</li>
+              </ul>
+            </div>
+            <div class="lg:col-span-5 rounded-2xl bg-dash-input border border-slate-800 p-5 space-y-3.5">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <span class="font-mono text-xs uppercase text-slate-400">Сводка • Япония / США</span>
+                <span class="px-2.5 py-1 rounded-full bg-emeralddash/15 text-emeralddash text-xs font-bold">Лечим C1555 / U3000</span>
+              </div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Типовые коды:</span><strong class="font-mono text-amberdash">C1555 / C1515 / U3000</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Ремонт блока ЭУР:</span><strong class="text-white">от 6 000 ₽ (3–4 ч)</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Датчик / колонка:</span><strong class="text-white">от 5 000 ₽ (2–4 ч)</strong></div>
+              <button type="button" class="jump-calc-btn w-full py-3 rounded-xl bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 font-bold text-sm shadow-amberGlow hover:brightness-110 transition" data-cat="japan_usa" data-unit="ecu" data-brand="Япония / США">
+                Рассчитать ремонт Япония / США →
+              </button>
+            </div>
+          </div>
+
+          <!-- 5. Китай и Электромобили -->
+          <div id="panel-china_ev" class="tab-panel hidden grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-7">
+              <div class="font-mono text-xs uppercase text-emeralddash font-semibold mb-2">● Современные EPS • Гибриды и EV</div>
+              <h3 class="text-2xl font-extrabold text-white mb-3">Китайские автомобили и Электромобили</h3>
+              <p class="text-slate-300 text-[15px] mb-5">
+                Восстанавливаем дефицитные электронные блоки управления ЭУР на компонентном уровне — без двухмесячного ожидания новой запчасти и привязки у дилера.
+              </p>
+              <div class="flex flex-wrap gap-2 mb-5">
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-emeralddash/15 border border-emeralddash/40 text-emerald-300 text-xs font-semibold hover:bg-emeralddash/25 transition" data-cat="china_ev" data-brand="Geely">Geely</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-emeralddash/15 border border-emeralddash/40 text-emerald-300 text-xs font-semibold hover:bg-emeralddash/25 transition" data-cat="china_ev" data-brand="Chery">Chery</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-emeralddash/15 border border-emeralddash/40 text-emerald-300 text-xs font-semibold hover:bg-emeralddash/25 transition" data-cat="china_ev" data-brand="Haval">Haval</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-dash-input border border-slate-700 text-slate-200 text-xs font-semibold hover:border-emeralddash transition" data-cat="china_ev" data-brand="Changan">Changan</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="china_ev" data-brand="BYD">BYD</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="china_ev" data-brand="Evolute">Evolute</button>
+                <button type="button" class="quick-brand px-3 py-1.5 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amber-200 text-xs font-semibold hover:bg-amberdash/25 transition" data-cat="china_ev" data-brand="Zeekr">Zeekr</button>
+              </div>
+              <ul class="space-y-2.5 text-sm text-slate-300">
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> Компонентный ремонт сгоревших и залитых плат ЭБУ ЭУР (MOSFET, драйверы, стабилизаторы питания).</li>
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> Снятие программных блокировок после ДТП, переполюсовки и просадки низковольтного АКБ.</li>
+                <li class="flex gap-2.5"><span class="text-emeralddash font-bold">✓</span> Точная калибровка датчика момента и угла поворота для корректной работы систем стабилизации.</li>
+              </ul>
+            </div>
+            <div class="lg:col-span-5 rounded-2xl bg-dash-input border border-slate-800 p-5 space-y-3.5">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <span class="font-mono text-xs uppercase text-slate-400">Сводка • Китай / EV</span>
+                <span class="px-2.5 py-1 rounded-full bg-emeralddash/15 text-emeralddash text-xs font-bold">Без ожидания 60 дней</span>
+              </div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Стендовая диагностика:</span><strong class="text-white">от 1 500 ₽</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Ремонт платы ЭУР:</span><strong class="text-white">от 8 000 ₽ (3–6 ч)</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">После влаги / КЗ:</span><strong class="text-white">от 9 000 ₽ (1 рабочий день)</strong></div>
+              <button type="button" class="jump-calc-btn w-full py-3 rounded-xl bg-gradient-to-r from-emeralddash to-emerald-600 text-slate-950 font-bold text-sm shadow-emeraldGlow hover:brightness-110 transition" data-cat="china_ev" data-unit="ecu" data-brand="Китай / EV">
+                Рассчитать ремонт Китай / EV →
+              </button>
+            </div>
+          </div>
+
+          <!-- 6. Доставка СДЭК -->
+          <div id="panel-cdek" class="tab-panel hidden grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-7">
+              <div class="font-mono text-xs uppercase text-emeralddash font-semibold mb-2">● Приём снятых ЭУР и блоков ЭБУ со всей России</div>
+              <h3 class="text-2xl font-extrabold text-white mb-3">Доставка через СДЭК с видеоотчётом со стенда</h3>
+              <p class="text-slate-300 text-[15px] mb-5">
+                Отправьте снятый блок управления ЭУР или рулевую колонку с ЭУР в нашу мастерскую в Уфе через СДЭК. Отремонтируем за 1–2 дня, покажем видео проверки на нагрузочном стенде и отправим обратно.
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div class="rounded-2xl bg-dash-input border border-slate-800 p-4">
+                  <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amberdash text-slate-950 font-mono font-bold text-xs mb-2">01</span>
+                  <h4 class="font-bold text-sm text-white mb-1">Консультация и снятие</h4>
+                  <p class="text-xs text-slate-400">Подскажем по телефону, достаточно ли снять только блок ЭБУ ЭУР или отправить колонку целиком.</p>
+                </div>
+                <div class="rounded-2xl bg-dash-input border border-slate-800 p-4">
+                  <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amberdash text-slate-950 font-mono font-bold text-xs mb-2">02</span>
+                  <h4 class="font-bold text-sm text-white mb-1">Отправка в Уфу через СДЭК</h4>
+                  <p class="text-xs text-slate-400">Упакуйте блок в пупырчатую плёнку, вложите номер телефона и отправьте в наш пункт приёма в Уфе.</p>
+                </div>
+                <div class="rounded-2xl bg-dash-input border border-slate-800 p-4">
+                  <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amberdash text-slate-950 font-mono font-bold text-xs mb-2">03</span>
+                  <h4 class="font-bold text-sm text-white mb-1">Диагностика и согласование</h4>
+                  <p class="text-xs text-slate-400">В день получения проверяем плату на стенде, присылаем фото дефекта и точную цену до начала пайки.</p>
+                </div>
+                <div class="rounded-2xl bg-dash-input border border-emeralddash/40 p-4">
+                  <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-emeralddash text-slate-950 font-mono font-bold text-xs mb-2">04</span>
+                  <h4 class="font-bold text-sm text-white mb-1">Видеоотчёт и возврат</h4>
+                  <p class="text-xs text-slate-400">Снимаем видео исправного блока под нагрузкой, после оплаты отправляем обратно СДЭК с гарантией.</p>
+                </div>
+              </div>
+            </div>
+            <div class="lg:col-span-5 rounded-2xl bg-dash-input border border-emeralddash/40 p-5 space-y-3.5">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <span class="font-mono text-xs uppercase text-slate-400">Приём по всей РФ</span>
+                <span class="px-2.5 py-1 rounded-full bg-emeralddash/15 text-emeralddash text-xs font-bold">Без предоплаты</span>
+              </div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Мастерская:</span><strong class="text-white text-right">г. Уфа, ул. Самаркандская, 1/4</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Срок ремонта:</span><strong class="text-white">1 – 2 рабочих дня</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Стоимость ремонта:</span><strong class="text-white">от 5 000 ₽</strong></div>
+              <div class="flex justify-between text-sm"><span class="text-slate-400">Видеоотчёт со стенда:</span><strong class="text-emeralddash">До оплаты</strong></div>
+              <button type="button" id="cdek-booking-btn" class="w-full py-3 rounded-xl bg-gradient-to-r from-emeralddash to-emerald-600 text-slate-950 font-bold text-sm shadow-emeraldGlow hover:brightness-110 transition">
+                Получить инструкцию по отправке СДЭК
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 5. ИНТЕРАКТИВНЫЙ КАЛЬКУЛЯТОР ===================== -->
+    <section id="calculator" class="py-16 lg:py-20 bg-[#0e131d] dash-grid border-b border-slate-800/80">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto text-center mb-12">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amberdash/15 border border-amberdash/40 text-amber-300 text-xs font-bold uppercase tracking-wider mb-3">
+            Онлайн-оценка за 30 секунд
+          </span>
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+            Калькулятор стоимости ремонта ЭУР
+          </h2>
+          <p class="mt-3 text-slate-400 text-base">
+            Укажите марку авто, тип узла и симптомы — получите ориентировочную стартовую стоимость, сроки и вероятную причину поломки.
+          </p>
+        </div>
+
+        <div class="rounded-[26px] bg-dash-surface border border-slate-700/90 overflow-hidden shadow-panel grid grid-cols-1 lg:grid-cols-12">
+
+          <!-- Левая часть калькулятора -->
+          <div class="lg:col-span-7 p-6 sm:p-8 lg:border-r border-b lg:border-b-0 border-slate-800 space-y-6">
+
+            <!-- Шаг 1: Категория / марка -->
+            <div>
+              <label for="calc-category" class="block text-sm font-bold text-white mb-2.5">1. Категория и марка автомобиля</label>
+              <select id="calc-category" class="w-full h-12 px-4 rounded-xl bg-dash-input border border-slate-700 text-sm text-white focus:outline-none focus:border-amberdash focus:ring-2 focus:ring-amberdash/20 cursor-pointer">
+                <option value="korea">Корея (Hyundai Solaris, Creta, Elantra, Kia Rio, Ceed, Sportage)</option>
+                <option value="lada">Отечественные / Lada (Granta, Priora, Kalina, Vesta, Niva)</option>
+                <option value="europe">Европа и VAG (VW Polo/Golf, Skoda Rapid/Octavia, Renault, BMW, Mercedes, Audi)</option>
+                <option value="japan_usa">Япония и США (Toyota, Honda, Nissan, Mazda, Mitsubishi, Ford, Chevrolet)</option>
+                <option value="china_ev">Китай и Электромобили (Geely, Chery, Haval, Changan, BYD, Evolute, Zeekr)</option>
+              </select>
+
+              <!-- Подвыбор производителя ЭУР при выборе Lada -->
+              <div id="lada-sub-box" class="hidden mt-3 p-3.5 rounded-xl bg-dash-input border border-amberdash/40">
+                <span class="block text-[11px] font-bold uppercase tracking-wider text-amberdash mb-2.5">Производитель ЭУР Lada:</span>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <button type="button" class="lada-opt py-2.5 px-2 rounded-xl border text-xs font-bold transition" data-lada="makhachkala">Махачкала</button>
+                  <button type="button" class="lada-opt py-2.5 px-2 rounded-xl border text-xs font-bold transition" data-lada="kaluga">Калуга</button>
+                  <button type="button" class="lada-opt py-2.5 px-2 rounded-xl border text-xs font-bold transition" data-lada="mando">Mando</button>
+                  <button type="button" class="lada-opt py-2.5 px-2 rounded-xl border text-xs font-bold transition" data-lada="unknown">Не знаю</button>
+                </div>
+              </div>
+
+              <input type="text" id="calc-model" class="mt-3 w-full h-12 px-4 rounded-xl bg-dash-input border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amberdash focus:ring-2 focus:ring-amberdash/20" placeholder="Введите свою модель и год (например: Hyundai Solaris 2017)" aria-label="Своя модель и год">
+            </div>
+
+            <!-- Шаг 2: Тип узла -->
+            <div>
+              <span class="block text-sm font-bold text-white mb-2.5">2. Тип ремонтируемого узла</span>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <button type="button" class="unit-opt p-3.5 rounded-xl border text-left transition" data-unit="ecu">
+                  <span class="block text-[13.5px] font-bold leading-snug">Электронный блок управления ЭБУ ЭУР</span>
+                  <span class="block text-[11.5px] text-slate-400 mt-1">Пайка ключей, реле, платы</span>
+                </button>
+                <button type="button" class="unit-opt p-3.5 rounded-xl border text-left transition" data-unit="column">
+                  <span class="block text-[13.5px] font-bold leading-snug">Рулевая колонка с ЭУР в сборе</span>
+                  <span class="block text-[11.5px] text-slate-400 mt-1">ЭБУ + электромотор + муфта</span>
+                </button>
+                <button type="button" class="unit-opt p-3.5 rounded-xl border text-left transition" data-unit="sensor">
+                  <span class="block text-[13.5px] font-bold leading-snug">Датчик крутящего момента</span>
+                  <span class="block text-[11.5px] text-slate-400 mt-1">Оптика, ремонт, калибровка</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Шаг 3: Мультивыбор симптомов -->
+            <div>
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="text-sm font-bold text-white">3. Симптомы неисправности</span>
+                <span class="text-xs text-slate-400">Можно выбрать несколько</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button type="button" class="sym-btn flex items-start gap-2.5 p-3 rounded-xl border text-left text-[13px] font-semibold transition" data-sym="eps_lamp">
+                  <span class="sym-box w-[18px] h-[18px] rounded-[5px] border flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-extrabold"></span>
+                  <span>Горит лампа EPS</span>
+                </button>
+                <button type="button" class="sym-btn flex items-start gap-2.5 p-3 rounded-xl border text-left text-[13px] font-semibold transition" data-sym="heavy_wheel">
+                  <span class="sym-box w-[18px] h-[18px] rounded-[5px] border flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-extrabold"></span>
+                  <span>Руль стал тугим</span>
+                </button>
+                <button type="button" class="sym-btn flex items-start gap-2.5 p-3 rounded-xl border text-left text-[13px] font-semibold transition" data-sym="jerks_beat">
+                  <span class="sym-box w-[18px] h-[18px] rounded-[5px] border flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-extrabold"></span>
+                  <span>Закусывает / дёргает</span>
+                </button>
+                <button type="button" class="sym-btn flex items-start gap-2.5 p-3 rounded-xl border text-left text-[13px] font-semibold transition" data-sym="cuts_out">
+                  <span class="sym-box w-[18px] h-[18px] rounded-[5px] border flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-extrabold"></span>
+                  <span>Отключается на ходу</span>
+                </button>
+                <button type="button" class="sym-btn flex items-start gap-2.5 p-3 rounded-xl border text-left text-[13px] font-semibold transition" data-sym="noise_clicks">
+                  <span class="sym-box w-[18px] h-[18px] rounded-[5px] border flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-extrabold"></span>
+                  <span>Посторонний гул / щелчки</span>
+                </button>
+                <button type="button" class="sym-btn flex items-start gap-2.5 p-3 rounded-xl border text-left text-[13px] font-semibold transition" data-sym="water_polarity">
+                  <span class="sym-box w-[18px] h-[18px] rounded-[5px] border flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-extrabold"></span>
+                  <span>После влаги / переполюсовки</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Правая часть: Результат расчёта (только формат «от X ₽») -->
+          <div class="lg:col-span-5 p-6 sm:p-8 bg-gradient-to-br from-dash-input to-dash-elevated/80 flex flex-col justify-between gap-6">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-4">
+                <span class="font-mono text-xs uppercase text-amberdash font-bold">Предварительный расчёт</span>
+                <span class="px-2.5 py-1 rounded-full bg-emeralddash/15 text-emeralddash text-[11px] font-bold">Гарантия 12 мес.</span>
+              </div>
+
+              <div class="text-xs text-slate-400 mb-1">Ориентировочная стартовая стоимость:</div>
+              <div id="calc-price" class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">от 5 000 ₽</div>
+              <p class="text-xs text-slate-400 leading-relaxed mb-5">
+                Итоговая стоимость зависит от характера повреждений и определяется после диагностики и вскрытия блока.
+              </p>
+
+              <div class="rounded-2xl bg-dash-surface border border-slate-800 p-4 mb-3.5 flex items-center gap-3">
+                <svg class="w-5 h-5 text-amberdash shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <div>
+                  <div class="text-[11px] text-slate-400">Ориентировочный срок работ</div>
+                  <strong id="calc-time" class="text-sm text-white">2 – 4 часа</strong>
+                </div>
+              </div>
+
+              <div class="rounded-2xl bg-dash-surface border border-slate-800 p-4">
+                <div class="text-[11px] uppercase tracking-wider font-bold text-emeralddash mb-1.5">Вероятная причина неисправности:</div>
+                <p id="calc-cause" class="text-sm text-slate-300 leading-relaxed">
+                  Пробой силовых ключей MOSFET, подгорание контактов силового реле или сбой драйвера на плате блока управления ЭУР. Проведём диагностику на стенде и компонентную пайку.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <button type="button" id="calc-apply-btn" class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 font-bold text-[15px] shadow-amberGlow hover:brightness-110 transition">
+                Зафиксировать расчёт и записаться ↓
+              </button>
+              <p class="text-xs text-slate-400 text-center mt-2.5">
+                Детали расчёта автоматически перенесутся в форму записи ниже. Диагностика при ремонте — 0 ₽.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 6. ПРАЙС-ЛИСТ (ТОЛЬКО «ОТ X ₽») И 5 ЭТАПОВ РАБОТЫ ===================== -->
+    <section id="prices" class="py-16 lg:py-20 bg-dash-base border-b border-slate-800/80">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Прайс-лист -->
+        <div class="max-w-3xl mx-auto text-center mb-10">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emeralddash/15 border border-emeralddash/40 text-emerald-300 text-xs font-bold uppercase tracking-wider mb-3">
+            Прозрачные цены
+          </span>
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+            Прайс-лист на ремонт ЭУР и блоков ЭБУ
+          </h2>
+          <p class="mt-2.5 text-slate-400 text-base">
+            Указаны стартовые цены. Окончательную смету согласуем после стендовой диагностики и вскрытия блока — строго до начала ремонта.
+          </p>
+        </div>
+
+        <div class="rounded-[24px] bg-dash-surface border border-slate-800 overflow-hidden shadow-panel divide-y divide-slate-800 mb-16">
+          <!-- Позиция 1 -->
+          <div class="p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/[0.02] transition">
+            <div class="max-w-2xl">
+              <div class="flex flex-wrap items-center gap-2.5 mb-1">
+                <h3 class="text-base sm:text-lg font-bold text-white">Диагностика ЭУР и блока управления на нагрузочном стенде</h3>
+                <span class="px-2.5 py-0.5 rounded-full bg-emeralddash/15 text-emeralddash text-xs font-bold">Бесплатно при ремонте</span>
+              </div>
+              <p class="text-sm text-slate-400">Считывание кодов EPS, проверка CAN-шины, цепей питания и тестирование снятого блока под нагрузкой</p>
+            </div>
+            <div class="flex items-center justify-between md:justify-end gap-4 shrink-0">
+              <span class="font-mono text-lg font-bold text-amberdash">от 1 500 ₽</span>
+              <button type="button" class="price-pick-btn px-4 py-2 rounded-xl bg-dash-elevated border border-slate-700 hover:border-amberdash text-xs font-bold text-white hover:text-amber-300 transition" data-service="Диагностика ЭУР и блока управления на стенде" data-price="от 1 500 ₽">Выбрать</button>
+            </div>
+          </div>
+
+          <!-- Позиция 2 -->
+          <div class="p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/[0.02] transition">
+            <div class="max-w-2xl">
+              <div class="flex flex-wrap items-center gap-2.5 mb-1">
+                <h3 class="text-base sm:text-lg font-bold text-white">Компонентный ремонт блока ЭУР (пайка силовых ключей MOSFET, реле)</h3>
+                <span class="px-2.5 py-0.5 rounded-full bg-amberdash/15 text-amber-300 text-xs font-bold">Основная услуга</span>
+              </div>
+              <p class="text-sm text-slate-400">Замена пробитых MOSFET-транзисторов, силовых реле питания, драйверов и SMD-элементов на плате ЭБУ ЭУР</p>
+            </div>
+            <div class="flex items-center justify-between md:justify-end gap-4 shrink-0">
+              <span class="font-mono text-lg font-bold text-amberdash">от 5 000 ₽</span>
+              <button type="button" class="price-pick-btn px-4 py-2 rounded-xl bg-dash-elevated border border-slate-700 hover:border-amberdash text-xs font-bold text-white hover:text-amber-300 transition" data-service="Компонентный ремонт блока ЭУР (пайка ключей MOSFET, реле)" data-price="от 5 000 ₽">Выбрать</button>
+            </div>
+          </div>
+
+          <!-- Позиция 3 -->
+          <div class="p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/[0.02] transition">
+            <div class="max-w-2xl">
+              <h3 class="text-base sm:text-lg font-bold text-white mb-1">Восстановление платы ЭБУ ЭУР после влаги, переполюсовки или КЗ</h3>
+              <p class="text-sm text-slate-400">Ультразвуковая очистка, восстановление выгоревших дорожек и переходов, замена микросхем и защитное лакирование платы</p>
+            </div>
+            <div class="flex items-center justify-between md:justify-end gap-4 shrink-0">
+              <span class="font-mono text-lg font-bold text-amberdash">от 6 000 ₽</span>
+              <button type="button" class="price-pick-btn px-4 py-2 rounded-xl bg-dash-elevated border border-slate-700 hover:border-amberdash text-xs font-bold text-white hover:text-amber-300 transition" data-service="Восстановление платы ЭБУ ЭУР после влаги, переполюсовки или КЗ" data-price="от 6 000 ₽">Выбрать</button>
+            </div>
+          </div>
+
+          <!-- Позиция 4 -->
+          <div class="p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/[0.02] transition">
+            <div class="max-w-2xl">
+              <div class="flex flex-wrap items-center gap-2.5 mb-1">
+                <h3 class="text-base sm:text-lg font-bold text-white">Ремонт рулевой колонки с ЭУР в сборе</h3>
+                <span class="px-2.5 py-0.5 rounded-full bg-amberdash/15 text-amber-300 text-xs font-bold">Популярно</span>
+              </div>
+              <p class="text-sm text-slate-400">Устранение стуков, гула и люфтов, замена демпферной муфты, подшипников, обслуживание электромотора и электронной части колонки</p>
+            </div>
+            <div class="flex items-center justify-between md:justify-end gap-4 shrink-0">
+              <span class="font-mono text-lg font-bold text-amberdash">от 5 000 ₽</span>
+              <button type="button" class="price-pick-btn px-4 py-2 rounded-xl bg-dash-elevated border border-slate-700 hover:border-amberdash text-xs font-bold text-white hover:text-amber-300 transition" data-service="Ремонт рулевой колонки с ЭУР в сборе" data-price="от 5 000 ₽">Выбрать</button>
+            </div>
+          </div>
+
+          <!-- Позиция 5 -->
+          <div class="p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/[0.02] transition">
+            <div class="max-w-2xl">
+              <h3 class="text-base sm:text-lg font-bold text-white mb-1">Ремонт ЭУР Lada (Махачкала, Калуга / Автоэлектроника, Mando)</h3>
+              <p class="text-sm text-slate-400">Ремонт всех модификаций Lada (Granta, Priora, Kalina, Vesta, Niva): замена оптопар, ключей, реле, восстановление плат и датчиков</p>
+            </div>
+            <div class="flex items-center justify-between md:justify-end gap-4 shrink-0">
+              <span class="font-mono text-lg font-bold text-amberdash">от 5 000 ₽</span>
+              <button type="button" class="price-pick-btn px-4 py-2 rounded-xl bg-dash-elevated border border-slate-700 hover:border-amberdash text-xs font-bold text-white hover:text-amber-300 transition" data-service="Ремонт ЭУР Lada (Махачкала, Калуга, Mando)" data-price="от 5 000 ₽">Выбрать</button>
+            </div>
+          </div>
+
+          <!-- Позиция 6 -->
+          <div class="p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/[0.02] transition">
+            <div class="max-w-2xl">
+              <h3 class="text-base sm:text-lg font-bold text-white mb-1">Замена и калибровка датчика крутящего момента</h3>
+              <p class="text-sm text-slate-400">Восстановление оптических и бесконтактных датчиков, устранение рывков и закусываний, адаптация «нулевой» точки руля</p>
+            </div>
+            <div class="flex items-center justify-between md:justify-end gap-4 shrink-0">
+              <span class="font-mono text-lg font-bold text-amberdash">от 5 000 ₽</span>
+              <button type="button" class="price-pick-btn px-4 py-2 rounded-xl bg-dash-elevated border border-slate-700 hover:border-amberdash text-xs font-bold text-white hover:text-amber-300 transition" data-service="Замена и калибровка датчика крутящего момента" data-price="от 5 000 ₽">Выбрать</button>
+            </div>
+          </div>
+
+          <!-- Позиция 7 -->
+          <div class="p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/[0.02] transition">
+            <div class="max-w-2xl">
+              <h3 class="text-base sm:text-lg font-bold text-white mb-1">Сложный ремонт блоков ЭУР премиум-автомобилей и электромобилей</h3>
+              <p class="text-sm text-slate-400">Восстановление многослойных плат Bosch, TRW, NSK, Valeo (BMW, Mercedes, Audi, VW, BYD, Evolute, Zeekr), снятие программных блокировок</p>
+            </div>
+            <div class="flex items-center justify-between md:justify-end gap-4 shrink-0">
+              <span class="font-mono text-lg font-bold text-amberdash">от 8 000 ₽</span>
+              <button type="button" class="price-pick-btn px-4 py-2 rounded-xl bg-dash-elevated border border-slate-700 hover:border-amberdash text-xs font-bold text-white hover:text-amber-300 transition" data-service="Сложный ремонт блоков ЭУР премиум- и электромобилей" data-price="от 8 000 ₽">Выбрать</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 этапов работы -->
+        <div class="text-center mb-10">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amberdash/15 border border-amberdash/40 text-amber-300 text-xs font-bold uppercase tracking-wider mb-3">
+            Как мы работаем
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">5 этапов от диагностики до гарантии</h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="rounded-2xl bg-dash-surface border border-slate-800 p-5">
+            <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-amberdash/15 border border-amberdash/40 font-mono font-bold text-sm text-amberdash mb-4">01</span>
+            <h3 class="font-bold text-[15px] text-white mb-1.5">Обращение</h3>
+            <p class="text-xs sm:text-[13px] text-slate-400 leading-relaxed">Приезжаете на ул. Самаркандская, 1/4, привозите снятый блок или отправляете его СДЭК.</p>
+          </div>
+          <div class="rounded-2xl bg-dash-surface border border-slate-800 p-5">
+            <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-amberdash/15 border border-amberdash/40 font-mono font-bold text-sm text-amberdash mb-4">02</span>
+            <h3 class="font-bold text-[15px] text-white mb-1.5">Диагностика</h3>
+            <p class="text-xs sm:text-[13px] text-slate-400 leading-relaxed">Тестируем ЭУР и плату ЭБУ на стенде, выявляем пробитые ключи, реле или ошибки датчиков.</p>
+          </div>
+          <div class="rounded-2xl bg-dash-surface border border-slate-800 p-5">
+            <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-amberdash/15 border border-amberdash/40 font-mono font-bold text-sm text-amberdash mb-4">03</span>
+            <h3 class="font-bold text-[15px] text-white mb-1.5">Согласование</h3>
+            <p class="text-xs sm:text-[13px] text-slate-400 leading-relaxed">Показываем причину после вскрытия и называем точную цену. Работаем строго после вашего согласия.</p>
+          </div>
+          <div class="rounded-2xl bg-dash-surface border border-slate-800 p-5">
+            <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-amberdash/15 border border-amberdash/40 font-mono font-bold text-sm text-amberdash mb-4">04</span>
+            <h3 class="font-bold text-[15px] text-white mb-1.5">Пайка и ремонт</h3>
+            <p class="text-xs sm:text-[13px] text-slate-400 leading-relaxed">Меняем MOSFET, реле, драйверы, восстанавливаем дорожки и калибруем датчики момента.</p>
+          </div>
+          <div class="rounded-2xl bg-gradient-to-b from-emeralddash/10 to-dash-surface border border-emeralddash/45 p-5">
+            <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-emeralddash font-mono font-bold text-sm text-slate-950 mb-4">05</span>
+            <h3 class="font-bold text-[15px] text-white mb-1.5">Стенд и гарантия</h3>
+            <p class="text-xs sm:text-[13px] text-slate-300 leading-relaxed">Прогон под нагрузкой (видеоотчёт для СДЭК) и выдача узла с гарантией 12 месяцев.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 7. FAQ АККОРДЕОН ===================== -->
+    <section id="faq" class="py-16 lg:py-20 bg-[#0e131d] border-b border-slate-800/80">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amberdash/15 border border-amberdash/40 text-amber-300 text-xs font-bold uppercase tracking-wider mb-3">
+            Частые вопросы
+          </span>
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">Ответы на главные вопросы</h2>
+        </div>
+
+        <div class="space-y-3">
+          <!-- FAQ 1 -->
+          <div class="faq-item rounded-2xl bg-dash-surface border border-slate-800 overflow-hidden" data-open="true">
+            <button type="button" class="faq-trigger w-full px-5 sm:px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-[15.5px] text-white hover:text-amber-300 transition">
+              <span>Как формируется итоговая стоимость ремонта после диагностики и вскрытия блока?</span>
+              <svg class="faq-chevron w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content">
+              <div class="overflow-hidden">
+                <p class="px-5 sm:px-6 pb-5 text-sm text-slate-400 leading-relaxed">
+                  На сайте указаны стартовые цены в формате «от X ₽», поскольку итоговая стоимость зависит от модели авто, конструкции блока ЭБУ ЭУР и реального объёма повреждений внутри (локальная замена силовых ключей MOSFET или реле, либо глубокое восстановление многослойных дорожек, драйверов и процессора после влаги, переполюсовки или неудачной пайки). Точную сумму мы фиксируем после стендовой диагностики и вскрытия блока — строго до начала ремонта.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div class="faq-item rounded-2xl bg-dash-surface border border-slate-800 overflow-hidden" data-open="false">
+            <button type="button" class="faq-trigger w-full px-5 sm:px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-[15.5px] text-white hover:text-amber-300 transition">
+              <span>Можно ли привезти к вам уже снятый блок ЭУР или рулевую колонку с ЭУР?</span>
+              <svg class="faq-chevron w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content">
+              <div class="overflow-hidden">
+                <p class="px-5 sm:px-6 pb-5 text-sm text-slate-400 leading-relaxed">
+                  Да, вы можете привезти снятый электронный блок управления ЭУР или рулевую колонку с ЭУР в нашу мастерскую по адресу <strong class="text-slate-200">г. Уфа, ул. Самаркандская, 1/4</strong> (или приехать на самом автомобиле). Мы проверим узел на нагрузочном стенде, выполним компонентный ремонт и отдадим полностью готовым к установке.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div class="faq-item rounded-2xl bg-dash-surface border border-slate-800 overflow-hidden" data-open="false">
+            <button type="button" class="faq-trigger w-full px-5 sm:px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-[15.5px] text-white hover:text-amber-300 transition">
+              <span>Какую гарантию вы даёте на ремонт блока и ЭУР?</span>
+              <svg class="faq-chevron w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content">
+              <div class="overflow-hidden">
+                <p class="px-5 sm:px-6 pb-5 text-sm text-slate-400 leading-relaxed">
+                  Мы даём гарантию 12 месяцев на выполненные работы и установленные электронные компоненты (силовые ключи MOSFET, реле, драйверы, датчики момента). Гарантия одинаково действует для клиентов из Уфы и для блоков, присланных через СДЭК.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div class="faq-item rounded-2xl bg-dash-surface border border-slate-800 overflow-hidden" data-open="false">
+            <button type="button" class="faq-trigger w-full px-5 sm:px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-[15.5px] text-white hover:text-amber-300 transition">
+              <span>Как отправить снятый блок ЭУР через СДЭК из другого города?</span>
+              <svg class="faq-chevron w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content">
+              <div class="overflow-hidden">
+                <p class="px-5 sm:px-6 pb-5 text-sm text-slate-400 leading-relaxed">
+                  Позвоните по номеру +7 (963) 899-97-67 или напишите в WhatsApp/Telegram — мы дадим реквизиты получателя СДЭК в Уфе. В день получения проводим диагностику, согласуем стоимость, ремонтируем за 1–2 рабочих дня и присылаем видео проверки вашего блока на нагрузочном стенде до оплаты.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 5 -->
+          <div class="faq-item rounded-2xl bg-dash-surface border border-slate-800 overflow-hidden" data-open="false">
+            <button type="button" class="faq-trigger w-full px-5 sm:px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-[15.5px] text-white hover:text-amber-300 transition">
+              <span>Ремонтируете ли вы блоки после попадания влаги, переполюсовки или неудачной пайки?</span>
+              <svg class="faq-chevron w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content">
+              <div class="overflow-hidden">
+                <p class="px-5 sm:px-6 pb-5 text-sm text-slate-400 leading-relaxed">
+                  Да, к нам регулярно привозят и присылают блоки ЭБУ ЭУР после короткого замыкания, переполюсовки АКБ, окисления от воды и оторванных дорожек после сторонней пайки. Под микроскопом восстанавливаем проводники, меняем повреждённые элементы и покрываем плату защитным лаком.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 8. КОНТАКТЫ, АДРЕС И ФОРМА ЗАПИСИ ===================== -->
+    <section id="contacts" class="py-16 lg:py-20 bg-dash-base">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mb-10">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amberdash/15 border border-amberdash/40 text-amber-300 text-xs font-bold uppercase tracking-wider mb-3">
+            Адрес и прямая связь
+          </span>
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+            Контакты, адрес и запись на ремонт
+          </h2>
+          <p class="mt-2.5 text-slate-400 text-base">
+            Приезжайте на автомобиле, привозите снятый блок ЭУР или отправьте заявку — мастер свяжется с вами и сориентирует по ремонту.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+          <!-- ЛЕВАЯ КОЛОНКА: Адрес, навигатор, режим работы, телефоны и мессенджеры -->
+          <div class="lg:col-span-6 space-y-5">
+
+            <!-- Крупный блок адреса + копирование + Яндекс Карты + 2ГИС -->
+            <div class="rounded-2xl bg-dash-surface border border-amberdash/40 p-5 sm:p-6 shadow-panel">
+              <div class="flex items-start gap-3.5 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-amberdash/15 border border-amberdash/40 text-amberdash flex items-center justify-center shrink-0">
+                  <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div>
+                  <span class="block font-mono text-[11px] uppercase tracking-wider text-amberdash font-bold">Адрес мастерской</span>
+                  <h3 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5">г. Уфа, ул. Самаркандская, 1/4</h3>
+                  <p class="text-xs text-slate-400 mt-1">Приём автомобилей, снятых блоков ЭБУ ЭУР и рулевых колонок с ЭУР</p>
+                </div>
+              </div>
+
+              <!-- Кнопки: Скопировать адрес, Яндекс Карты, 2ГИС -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <button type="button" class="copy-btn inline-flex items-center justify-center gap-2 min-h-[44px] px-3.5 py-2.5 rounded-xl bg-dash-elevated border border-slate-700 hover:border-amberdash text-xs sm:text-[13px] font-bold text-white hover:text-amber-300 transition" data-copy="г. Уфа, ул. Самаркандская, 1/4" data-toast="Адрес скопирован">
+                  <svg class="w-4 h-4 text-amberdash shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Скопировать адрес
+                </button>
+                <a href="https://yandex.ru/maps/?text=%D0%A3%D1%84%D0%B0%2C%20%D1%83%D0%BB.%20%D0%A1%D0%B0%D0%BC%D0%B0%D1%80%D0%BA%D0%B0%D0%BD%D0%B4%D1%81%D0%BA%D0%B0%D1%8F%2C%201%2F4" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 min-h-[44px] px-3.5 py-2.5 rounded-xl bg-amberdash text-slate-950 font-bold text-xs sm:text-[13px] hover:brightness-110 transition">
+                  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                  Яндекс Карты
+                </a>
+                <a href="https://2gis.ru/ufa/search/%D0%A3%D1%84%D0%B0%2C%20%D1%83%D0%BB.%20%D0%A1%D0%B0%D0%BC%D0%B0%D1%80%D0%BA%D0%B0%D0%BD%D0%B4%D1%81%D0%BA%D0%B0%D1%8F%2C%201%2F4" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 min-h-[44px] px-3.5 py-2.5 rounded-xl bg-emeralddash text-slate-950 font-bold text-xs sm:text-[13px] hover:brightness-110 transition">
+                  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                  2ГИС
+                </a>
+              </div>
+            </div>
+
+            <!-- Тёмная стилизованная векторная схема проезда в стиле автонавигатора -->
+            <div class="relative rounded-2xl bg-[#090d14] border border-slate-800 overflow-hidden p-5 shadow-panel">
+              <svg class="absolute inset-0 w-full h-full opacity-60 pointer-events-none" viewBox="0 0 600 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                  <pattern id="navGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(148,163,184,0.1)" stroke-width="1"/>
+                  </pattern>
+                </defs>
+                <rect width="600" height="260" fill="url(#navGrid)"/>
+                <!-- Магистрали -->
+                <path d="M-20 210 C 120 185, 220 140, 315 128 S 490 95, 620 65" fill="none" stroke="#1e293b" stroke-width="18" stroke-linecap="round"/>
+                <path d="M-20 210 C 120 185, 220 140, 315 128 S 490 95, 620 65" fill="none" stroke="#f59e0b" stroke-opacity="0.35" stroke-width="2" stroke-dasharray="8 8"/>
+                <path d="M170 -10 L 250 270" fill="none" stroke="#1e293b" stroke-width="12"/>
+                <path d="M390 -10 L 340 270" fill="none" stroke="#1e293b" stroke-width="10"/>
+                <!-- Активный маршрут -->
+                <path d="M40 198 C 145 178, 220 140, 300 130" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+                <!-- Радарные кольца -->
+                <circle cx="300" cy="130" r="46" fill="none" stroke="rgba(245,158,11,0.28)" stroke-width="1.2" stroke-dasharray="4 4"/>
+                <circle cx="300" cy="130" r="88" fill="none" stroke="rgba(16,185,129,0.18)" stroke-width="1"/>
+              </svg>
+
+              <div class="relative z-10 flex flex-col justify-between min-h-[215px]">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-dash-surface/90 border border-slate-700 font-mono text-[11px] font-bold text-emeralddash">
+                    <span class="w-2 h-2 rounded-full bg-emeralddash"></span>
+                    NAV MODE • УФА
+                  </span>
+                  <span class="font-mono text-[11px] text-slate-400 bg-dash-base/80 px-2.5 py-1 rounded-lg border border-slate-800">
+                    Приём авто и снятых ЭУР
+                  </span>
+                </div>
+
+                <!-- Пульсирующий маркер -->
+                <div class="my-5 flex flex-col items-center">
+                  <div class="relative flex items-center justify-center">
+                    <span class="absolute w-11 h-11 rounded-full bg-amberdash/40 radar-ping"></span>
+                    <div class="relative w-11 h-11 rounded-full bg-gradient-to-br from-amberdash to-amberdash-hot text-slate-950 flex items-center justify-center shadow-amberGlow border-2 border-white/80">
+                      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    </div>
+                  </div>
+                  <div class="mt-2.5 px-4 py-1.5 rounded-xl bg-dash-surface/95 border border-amberdash/50 text-xs sm:text-[13px] font-bold text-white shadow-lg text-center">
+                    ЭУР-Мастер • ул. Самаркандская, 1/4
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-3 flex-wrap pt-3 border-t border-slate-800/80">
+                  <span class="text-xs text-slate-400">Удобный подъезд и парковка у мастерской</span>
+                  <a href="https://yandex.ru/maps/?text=%D0%A3%D1%84%D0%B0%2C%20%D1%83%D0%BB.%20%D0%A1%D0%B0%D0%BC%D0%B0%D1%80%D0%BA%D0%B0%D0%BD%D0%B4%D1%81%D0%BA%D0%B0%D1%8F%2C%201%2F4" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-dash-elevated border border-amberdash/50 text-amber-300 hover:bg-amberdash hover:text-slate-950 text-xs font-bold transition">
+                    Построить маршрут →
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Режим работы -->
+            <div class="rounded-2xl bg-dash-surface border border-slate-800 p-5 flex items-start gap-3.5">
+              <div class="w-11 h-11 rounded-xl bg-emeralddash/15 border border-emeralddash/35 text-emeralddash flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <div>
+                <span class="block font-mono text-[11px] uppercase tracking-wider text-slate-400">Режим работы</span>
+                <strong class="block text-sm sm:text-base text-white mt-0.5">Пн–Сб: 09:00–20:00, Вс — по предварительной записи</strong>
+                <p class="text-xs text-slate-400 mt-1">Принимаем автомобили целиком, снятые блоки ЭБУ ЭУР в Уфе и посылки СДЭК со всей России.</p>
+              </div>
+            </div>
+
+            <!-- Оба телефона + копирование, WhatsApp и Telegram -->
+            <div class="rounded-2xl bg-dash-surface border border-slate-800 p-5 space-y-4">
+              <div class="font-mono text-[11px] uppercase tracking-wider text-slate-400">Телефоны и мессенджеры</div>
+
+              <!-- Телефон 1 -->
+              <div class="p-3.5 rounded-xl bg-dash-input border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <a href="tel:+79638999767" class="font-mono text-lg font-bold text-white hover:text-amberdash transition">+7 (963) 899-97-67</a>
+                  <span class="block text-[11px] text-slate-400">Основной номер • Звонок / WhatsApp / Telegram</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <a href="tel:+79638999767" class="px-3 py-2 rounded-lg bg-dash-elevated border border-amberdash/40 text-amber-300 text-xs font-bold hover:bg-amberdash hover:text-slate-950 transition">Позвонить</a>
+                  <button type="button" class="copy-btn px-3 py-2 rounded-lg bg-dash-elevated border border-slate-700 text-slate-200 text-xs font-semibold hover:border-amberdash transition" data-copy="+7 (963) 899-97-67" data-toast="Телефон +7 (963) 899-97-67 скопирован">Копировать</button>
+                  <a href="https://wa.me/79638999767" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold hover:brightness-110 transition">WhatsApp</a>
+                  <a href="https://t.me/+79638999767" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-lg bg-sky-500 text-white text-xs font-bold hover:brightness-110 transition">Telegram</a>
+                </div>
+              </div>
+
+              <!-- Телефон 2 -->
+              <div class="p-3.5 rounded-xl bg-dash-input border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <a href="tel:+79965820805" class="font-mono text-lg font-bold text-white hover:text-emeralddash transition">+7 (996) 582-08-05</a>
+                  <span class="block text-[11px] text-slate-400">Вторая линия • Звонок / WhatsApp</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <a href="tel:+79965820805" class="px-3 py-2 rounded-lg bg-dash-elevated border border-emeralddash/40 text-emerald-300 text-xs font-bold hover:bg-emeralddash hover:text-slate-950 transition">Позвонить</a>
+                  <button type="button" class="copy-btn px-3 py-2 rounded-lg bg-dash-elevated border border-slate-700 text-slate-200 text-xs font-semibold hover:border-emeralddash transition" data-copy="+7 (996) 582-08-05" data-toast="Телефон +7 (996) 582-08-05 скопирован">Копировать</button>
+                  <a href="https://wa.me/79965820805" target="_blank" rel="noopener noreferrer" class="px-3 py-2 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold hover:brightness-110 transition">WhatsApp</a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ПРАВАЯ КОЛОНКА: Форма записи -->
+          <div id="booking-block" class="lg:col-span-6 rounded-[26px] bg-dash-surface border border-slate-700/90 p-6 sm:p-8 shadow-panel">
+            <h3 class="text-2xl font-extrabold text-white mb-1.5">Записаться на диагностику или ремонт</h3>
+            <p class="text-sm text-slate-400 mb-6">Оставьте заявку — мастер перезвонит или напишет вам в выбранный мессенджер в рабочее время.</p>
+
+            <!-- Блок прикреплённого расчёта из калькулятора -->
+            <div id="calc-attached-box" class="hidden mb-5 p-4 rounded-2xl bg-emeralddash/10 border border-emeralddash/45">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="font-mono text-xs font-bold uppercase text-emeralddash">✓ Расчёт прикреплён к заявке</span>
+                <button type="button" id="calc-attached-reset" class="text-xs text-slate-400 underline hover:text-white">Сбросить</button>
+              </div>
+              <div id="calc-attached-text" class="text-xs sm:text-[13px] text-slate-200 leading-relaxed"></div>
+            </div>
+
+            <form id="booking-form" class="space-y-4" novalidate>
+              <div>
+                <label for="bf-details" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Детали расчёта / описание проблемы</label>
+                <textarea id="bf-details" name="details" rows="3" class="w-full px-4 py-3 rounded-xl bg-dash-input border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amberdash focus:ring-2 focus:ring-amberdash/20 resize-y" placeholder="Опишите симптомы, код ошибки, нужен ли ремонт снятого блока ЭУР или отправка через СДЭК..."></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="bf-name" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Ваше имя *</label>
+                  <input type="text" id="bf-name" name="name" required class="w-full h-12 px-4 rounded-xl bg-dash-input border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amberdash focus:ring-2 focus:ring-amberdash/20" placeholder="Например, Руслан">
+                </div>
+                <div>
+                  <label for="bf-car" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Марка и год авто</label>
+                  <input type="text" id="bf-car" name="car" class="w-full h-12 px-4 rounded-xl bg-dash-input border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amberdash focus:ring-2 focus:ring-amberdash/20" placeholder="Hyundai Solaris 2017">
+                </div>
+              </div>
+
+              <div>
+                <label for="bf-phone" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Телефон *</label>
+                <input type="tel" id="bf-phone" name="phone" required class="w-full h-12 px-4 rounded-xl bg-dash-input border border-slate-700 font-mono text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amberdash focus:ring-2 focus:ring-amberdash/20" placeholder="+7 (___) ___-__-__">
+              </div>
+
+              <div>
+                <span class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Удобный способ связи</span>
+                <div class="grid grid-cols-3 gap-2.5">
+                  <button type="button" class="channel-btn min-h-[44px] rounded-xl border text-sm font-bold transition" data-channel="Звонок">Звонок</button>
+                  <button type="button" class="channel-btn min-h-[44px] rounded-xl border text-sm font-bold transition" data-channel="WhatsApp">WhatsApp</button>
+                  <button type="button" class="channel-btn min-h-[44px] rounded-xl border text-sm font-bold transition" data-channel="Telegram">Telegram</button>
+                </div>
+                <input type="hidden" id="bf-channel" name="channel" value="Звонок">
+              </div>
+
+              <div id="bf-error" class="hidden p-3.5 rounded-xl bg-red-500/15 border border-red-500/45 text-red-300 text-xs font-semibold"></div>
+
+              <button type="submit" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 font-extrabold text-[15px] shadow-amberGlow hover:brightness-110 transition">
+                Отправить заявку мастеру
+              </button>
+
+              <p class="text-[11.5px] text-slate-500 text-center">
+                Нажимая кнопку, вы соглашаетесь на обработку контактных данных для обратной связи по вашей заявке.
+              </p>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== 9. FOOTER ===================== -->
+  <footer class="bg-[#070a0f] border-t border-slate-800/90 py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-7 border-b border-slate-800/80">
+        <!-- Лого и полный адрес -->
+        <div>
+          <a href="#top" class="inline-flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amberdash to-amberdash-hot p-[2px]">
+              <div class="w-full h-full rounded-[9px] bg-dash-base flex items-center justify-center">
+                <svg width="19" height="19" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                  <circle cx="16" cy="16" r="11.5" stroke="#f59e0b" stroke-width="2.4"/>
+                  <path d="M5.5 14.5H11.5M20.5 14.5H26.5M16 20.5V27.5" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round"/>
+                  <rect x="12" y="11" width="8" height="8" rx="1.8" fill="#10b981"/>
+                </svg>
+              </div>
+            </div>
+            <span class="text-lg font-extrabold text-white">ЭУР-<span class="text-amberdash">Мастер</span></span>
+          </a>
+          <div class="mt-2 flex items-center gap-1.5 text-sm text-slate-300">
+            <svg class="w-4 h-4 text-amberdash shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>г. Уфа, ул. Самаркандская, 1/4</span>
+          </div>
+        </div>
+
+        <!-- Быстрые ссылки -->
+        <div class="flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-400">
+          <a href="#ecu-repair" class="hover:text-amberdash transition">Пайка блоков</a>
+          <a href="#brands" class="hover:text-amberdash transition">Марки авто</a>
+          <a href="#calculator" class="hover:text-amberdash transition">Калькулятор</a>
+          <a href="#prices" class="hover:text-amberdash transition">Цены</a>
+          <a href="#faq" class="hover:text-amberdash transition">FAQ</a>
+          <a href="#contacts" class="hover:text-amberdash transition">Контакты</a>
+        </div>
+
+        <!-- Оба кликабельных телефона -->
+        <div class="flex flex-col lg:items-end gap-1 font-mono font-bold text-sm">
+          <a href="tel:+79638999767" class="text-white hover:text-amberdash transition">+7 (963) 899-97-67</a>
+          <a href="tel:+79965820805" class="text-slate-300 hover:text-emeralddash transition">+7 (996) 582-08-05</a>
+        </div>
+      </div>
+
+      <div class="pt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-slate-500">
+        <span>© 2026 «ЭУР-Мастер» — Ремонт электроусилителей руля и электронных блоков управления (ЭБУ ЭУР).</span>
+        <span>Информация на сайте носит справочный характер и не является публичной офертой.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ ЗАЯВКИ ===================== -->
+  <div id="success-modal" class="hidden fixed inset-0 z-[80] bg-black/80 backdrop-blur-sm items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="relative w-full max-w-lg rounded-[26px] bg-dash-surface border border-emeralddash/50 p-6 sm:p-7 shadow-2xl">
+      <button type="button" id="modal-close-btn" class="absolute top-4 right-4 w-9 h-9 rounded-xl bg-dash-input border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center" aria-label="Закрыть окно">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <div class="w-12 h-12 rounded-2xl bg-emeralddash/15 border border-emeralddash/45 text-emeralddash flex items-center justify-center mb-4">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+
+      <h3 id="modal-title" class="text-2xl font-extrabold text-white mb-1">Заявка принята!</h3>
+      <p class="text-sm text-slate-400">Мастер свяжется с вами в ближайшее время. Резюме вашей заявки:</p>
+
+      <div id="modal-summary" class="my-4 p-4 rounded-2xl bg-dash-input border border-slate-800 text-xs sm:text-sm text-slate-200 whitespace-pre-line leading-relaxed"></div>
+
+      <!-- Полный адрес мастерской -->
+      <div class="mb-4 p-3.5 rounded-xl bg-amberdash/10 border border-amberdash/35 flex items-center gap-2.5 text-xs sm:text-sm text-amber-200 font-semibold">
+        <svg class="w-4 h-4 text-amberdash shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Адрес мастерской: г. Уфа, ул. Самаркандская, 1/4</span>
+      </div>
+
+      <p class="text-xs text-slate-400 mb-2.5">Для срочной связи позвоните нам напрямую:</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <a href="tel:+79638999767" class="inline-flex items-center justify-center py-3 px-4 rounded-xl bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 font-mono font-bold text-sm">+7 (963) 899-97-67</a>
+        <a href="tel:+79965820805" class="inline-flex items-center justify-center py-3 px-4 rounded-xl bg-dash-elevated border border-slate-700 text-white font-mono font-bold text-sm hover:border-emeralddash">+7 (996) 582-08-05</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- КОНТЕЙНЕР TOAST-УВЕДОМЛЕНИЙ -->
+  <div id="toast-wrap" class="fixed bottom-4 right-4 left-4 sm:left-auto z-[90] flex flex-col gap-2.5 sm:max-w-sm pointer-events-none"></div>
+
+  <!-- ===================== JAVASCRIPT ===================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      'use strict';
+
+      /* -----------------------------------------------------------
+         ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ: TOAST И КОПИРОВАНИЕ В БУФЕР
+      ----------------------------------------------------------- */
+      const toastWrap = document.getElementById('toast-wrap');
+
+      function showToast(message) {
+        if (!toastWrap) return;
+        const item = document.createElement('div');
+        item.className = 'pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl bg-dash-surface border border-emeralddash/60 text-white text-sm font-semibold shadow-2xl transition-all duration-300';
+        item.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-emeralddash shrink-0"></span><span></span>';
+        item.querySelector('span:last-child').textContent = message;
+        toastWrap.appendChild(item);
+
+        setTimeout(function () {
+          item.style.opacity = '0';
+          item.style.transform = 'translateY(8px)';
+          setTimeout(function () {
+            if (item.parentNode) item.parentNode.removeChild(item);
+          }, 280);
+        }, 2600);
+      }
+
+      function copyTextReliable(text, successMsg) {
+        let copied = false;
+        try {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.setAttribute('readonly', '');
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          textarea.style.left = '-9999px';
+          document.body.appendChild(textarea);
+          textarea.select();
+          textarea.setSelectionRange(0, textarea.value.length);
+          copied = document.execCommand('copy');
+          document.body.removeChild(textarea);
+        } catch (err) {
+          copied = false;
+        }
+
+        if (copied) {
+          showToast(successMsg || 'Скопировано в буфер обмена');
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () {
+            showToast(successMsg || 'Скопировано в буфер обмена');
+          }).catch(function () {
+            showToast('Не удалось скопировать автоматически');
+          });
+        } else {
+          showToast('Выделите текст для копирования вручную');
+        }
+      }
+
+      document.querySelectorAll('.copy-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const val = btn.getAttribute('data-copy') || '';
+          const msg = btn.getAttribute('data-toast') || 'Скопировано';
+          copyTextReliable(val, msg);
+        });
+      });
+
+      /* -----------------------------------------------------------
+         1. МОБИЛЬНОЕ МЕНЮ (БУРГЕР)
+      ----------------------------------------------------------- */
+      const burgerBtn = document.getElementById('burger-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const iconOpen = document.getElementById('burger-icon-open');
+      const iconClose = document.getElementById('burger-icon-close');
+
+      function setMobileMenu(open) {
+        if (!mobileMenu || !burgerBtn) return;
+        mobileMenu.classList.toggle('hidden', !open);
+        if (iconOpen) iconOpen.classList.toggle('hidden', open);
+        if (iconClose) iconClose.classList.toggle('hidden', !open);
+        burgerBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+
+      if (burgerBtn && mobileMenu) {
+        burgerBtn.addEventListener('click', function () {
+          setMobileMenu(mobileMenu.classList.contains('hidden'));
+        });
+
+        document.querySelectorAll('.m-link').forEach(function (link) {
+          link.addEventListener('click', function () {
+            setMobileMenu(false);
+          });
+        });
+      }
+
+      /* -----------------------------------------------------------
+         2. КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: EPS DASHBOARD (ДО / ПОСЛЕ РЕМОНТА)
+         Чистая единая функция setEpsState(isRepaired), без
+         конкурирующих кликов на родительском контейнере!
+      ----------------------------------------------------------- */
+      const epsUI = {
+        panel: document.getElementById('eps-panel'),
+        led: document.getElementById('eps-led'),
+        badge: document.getElementById('eps-status-badge'),
+        btnBefore: document.getElementById('eps-btn-before'),
+        btnAfter: document.getElementById('eps-btn-after'),
+        toggleBtn: document.getElementById('eps-toggle-btn'),
+        thumb: document.getElementById('eps-thumb'),
+        dial: document.getElementById('eps-dial'),
+        arc: document.getElementById('eps-arc'),
+        iconWrap: document.getElementById('eps-icon-wrap'),
+        wheelRing: document.getElementById('svg-wheel-ring'),
+        wheelHub: document.getElementById('svg-wheel-hub'),
+        wheelSpokes: document.getElementById('svg-wheel-spokes'),
+        svgExcl: document.getElementById('svg-excl'),
+        svgCheck: document.getElementById('svg-check'),
+        dialLabel: document.getElementById('eps-dial-label'),
+        waveStatus: document.getElementById('eps-wave-status'),
+        wavePath: document.getElementById('eps-wave-path'),
+        barMosfetVal: document.getElementById('eps-bar-mosfet-val'),
+        barMosfet: document.getElementById('eps-bar-mosfet'),
+        barPowerVal: document.getElementById('eps-bar-power-val'),
+        barPower: document.getElementById('eps-bar-power'),
+        telDtcLbl: document.getElementById('tel-dtc-lbl'),
+        telDtcVal: document.getElementById('tel-dtc-val'),
+        telMosfetVal: document.getElementById('tel-mosfet-val'),
+        telRelayVal: document.getElementById('tel-relay-val'),
+        telEffortVal: document.getElementById('tel-effort-val'),
+        telCurrentLbl: document.getElementById('tel-current-lbl'),
+        telCurrentVal: document.getElementById('tel-current-val'),
+        telVoltageVal: document.getElementById('tel-voltage-val'),
+        footHint: document.getElementById('eps-foot-hint'),
+        footTag: document.getElementById('eps-foot-tag')
+      };
+
+      let epsIsRepaired = false;
+
+      function setEpsState(isRepaired) {
+        epsIsRepaired = Boolean(isRepaired);
+
+        if (epsUI.toggleBtn) {
+          epsUI.toggleBtn.setAttribute('aria-checked', epsIsRepaired ? 'true' : 'false');
+        }
+
+        if (epsIsRepaired) {
+          /* ---- РЕЖИМ: ПОСЛЕ РЕМОНТА (EPS OK) ---- */
+          if (epsUI.panel) {
+            epsUI.panel.className = 'rounded-[26px] bg-gradient-to-b from-dash-elevated via-dash-surface to-dash-base border-2 border-emeralddash/60 p-5 sm:p-6 shadow-[0_24px_60px_rgba(0,0,0,0.6),0_0_44px_rgba(16,185,129,0.22)] transition-all duration-300';
+          }
+          if (epsUI.led) {
+            epsUI.led.className = 'w-2.5 h-2.5 rounded-full bg-emeralddash shadow-[0_0_12px_rgba(16,185,129,0.95)]';
+          }
+          if (epsUI.badge) {
+            epsUI.badge.textContent = 'EPS OK — СТЕНД ПРОЙДЕН';
+            epsUI.badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emeralddash/15 border border-emeralddash/60 text-emeralddash font-mono text-[11px] font-bold tracking-wide transition-all duration-300';
+          }
+          if (epsUI.btnBefore) {
+            epsUI.btnBefore.className = 'flex-1 min-h-[42px] px-3 py-2 rounded-xl text-xs sm:text-[13px] font-bold bg-transparent text-slate-400 border border-transparent hover:text-red-300 transition cursor-pointer';
+          }
+          if (epsUI.btnAfter) {
+            epsUI.btnAfter.className = 'flex-1 min-h-[42px] px-3 py-2 rounded-xl text-xs sm:text-[13px] font-bold bg-emeralddash/20 text-emerald-300 border border-emeralddash/60 transition cursor-pointer';
+          }
+          if (epsUI.toggleBtn) {
+            epsUI.toggleBtn.className = 'relative shrink-0 w-16 h-9 rounded-full bg-emeralddash/25 border-2 border-emeralddash/75 p-1 transition-colors duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emeralddash';
+          }
+          if (epsUI.thumb) {
+            epsUI.thumb.className = 'block w-6 h-6 rounded-full bg-emeralddash shadow-md transform translate-x-7 transition-all duration-300';
+          }
+          if (epsUI.dial) {
+            epsUI.dial.className = 'relative w-44 h-44 rounded-full bg-dash-base border-[3px] border-emeralddash/65 shadow-[inset_0_0_32px_rgba(0,0,0,0.92),0_0_32px_rgba(16,185,129,0.24)] flex flex-col items-center justify-center transition-all duration-300';
+          }
+          if (epsUI.arc) {
+            epsUI.arc.setAttribute('stroke', '#10b981');
+            epsUI.arc.setAttribute('stroke-dasharray', '525 610');
+          }
+          if (epsUI.iconWrap) epsUI.iconWrap.className = 'eps-glow-ok';
+          if (epsUI.wheelRing) epsUI.wheelRing.setAttribute('stroke', '#10b981');
+          if (epsUI.wheelHub) epsUI.wheelHub.setAttribute('fill', '#10b981');
+          if (epsUI.wheelSpokes) epsUI.wheelSpokes.setAttribute('stroke', '#10b981');
+          if (epsUI.svgExcl) epsUI.svgExcl.style.opacity = '0';
+          if (epsUI.svgCheck) epsUI.svgCheck.style.opacity = '1';
+          if (epsUI.dialLabel) {
+            epsUI.dialLabel.textContent = 'EPS OK';
+            epsUI.dialLabel.className = 'font-mono text-xs font-bold text-emeralddash tracking-wider mt-0.5';
+          }
+
+          /* Осциллограмма и прогресс-бары (Исправная плавная синусоида и 100% шкалы) */
+          if (epsUI.waveStatus) {
+            epsUI.waveStatus.textContent = 'НОРМА • СИНУС';
+            epsUI.waveStatus.className = 'font-bold text-emeralddash';
+          }
+          if (epsUI.wavePath) {
+            epsUI.wavePath.setAttribute('d', 'M2 22 C 22 6, 42 6, 62 22 S 102 38, 122 22 S 162 6, 182 22 S 222 38, 258 22');
+            epsUI.wavePath.setAttribute('stroke', '#10b981');
+          }
+          if (epsUI.barMosfetVal) {
+            epsUI.barMosfetVal.textContent = '100% (НОВЫЕ КЛЮЧИ)';
+            epsUI.barMosfetVal.className = 'font-bold text-emeralddash';
+          }
+          if (epsUI.barMosfet) {
+            epsUI.barMosfet.className = 'h-full rounded-full bg-gradient-to-r from-emeralddash to-emerald-300 transition-all duration-500';
+            epsUI.barMosfet.style.width = '100%';
+          }
+          if (epsUI.barPowerVal) {
+            epsUI.barPowerVal.textContent = '98% (СТАБИЛЬНО)';
+            epsUI.barPowerVal.className = 'font-bold text-emeralddash';
+          }
+          if (epsUI.barPower) {
+            epsUI.barPower.className = 'h-full rounded-full bg-gradient-to-r from-emerald-500 to-emeralddash transition-all duration-500';
+            epsUI.barPower.style.width = '98%';
+          }
+
+          /* 6 параметров телеметрии (После ремонта) */
+          if (epsUI.telDtcLbl) epsUI.telDtcLbl.textContent = 'Статус шины CAN';
+          if (epsUI.telDtcVal) {
+            epsUI.telDtcVal.textContent = 'NO DTC (0 ошибок)';
+            epsUI.telDtcVal.className = 'block text-xs font-bold text-emeralddash mt-0.5';
+          }
+          if (epsUI.telMosfetVal) {
+            epsUI.telMosfetVal.textContent = 'НОВЫЕ (НОРМА)';
+            epsUI.telMosfetVal.className = 'block text-xs font-bold text-emeralddash mt-0.5';
+          }
+          if (epsUI.telRelayVal) {
+            epsUI.telRelayVal.textContent = 'ЗАМЕНЕНО (ОК)';
+            epsUI.telRelayVal.className = 'block text-xs font-bold text-emeralddash mt-0.5';
+          }
+          if (epsUI.telEffortVal) {
+            epsUI.telEffortVal.textContent = '1.2 Н·м (лёгкий руль)';
+            epsUI.telEffortVal.className = 'block text-xs font-bold text-emeralddash mt-0.5';
+          }
+          if (epsUI.telCurrentLbl) epsUI.telCurrentLbl.textContent = 'Рабочий ток стенда';
+          if (epsUI.telCurrentVal) {
+            epsUI.telCurrentVal.textContent = '28.5 А (стабильно)';
+            epsUI.telCurrentVal.className = 'block text-xs font-bold text-emeralddash mt-0.5';
+          }
+          if (epsUI.telVoltageVal) {
+            epsUI.telVoltageVal.textContent = '14.1 В';
+            epsUI.telVoltageVal.className = 'block text-xs font-bold text-emeralddash mt-0.5';
+          }
+          if (epsUI.footHint) {
+            epsUI.footHint.textContent = 'Блок ЭУР восстановлен: ключи и реле заменены, прогон на стенде пройден';
+          }
+          if (epsUI.footTag) {
+            epsUI.footTag.textContent = 'ПОСЛЕ РЕМОНТА ✓';
+            epsUI.footTag.className = 'font-mono font-bold text-emeralddash shrink-0';
+          }
+        } else {
+          /* ---- РЕЖИМ: ДО РЕМОНТА (EPS ERROR) ---- */
+          if (epsUI.panel) {
+            epsUI.panel.className = 'rounded-[26px] bg-gradient-to-b from-dash-elevated via-dash-surface to-dash-base border-2 border-red-500/45 p-5 sm:p-6 shadow-[0_24px_60px_rgba(0,0,0,0.6),0_0_40px_rgba(239,68,68,0.14)] transition-all duration-300';
+          }
+          if (epsUI.led) {
+            epsUI.led.className = 'w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.95)] blink-alert';
+          }
+          if (epsUI.badge) {
+            epsUI.badge.textContent = 'EPS ERROR — АВАРИЙНЫЙ РЕЖИМ';
+            epsUI.badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/15 border border-red-500/50 text-red-400 font-mono text-[11px] font-bold tracking-wide blink-alert transition-all duration-300';
+          }
+          if (epsUI.btnBefore) {
+            epsUI.btnBefore.className = 'flex-1 min-h-[42px] px-3 py-2 rounded-xl text-xs sm:text-[13px] font-bold bg-red-500/20 text-red-300 border border-red-500/50 transition cursor-pointer';
+          }
+          if (epsUI.btnAfter) {
+            epsUI.btnAfter.className = 'flex-1 min-h-[42px] px-3 py-2 rounded-xl text-xs sm:text-[13px] font-bold bg-transparent text-slate-400 border border-transparent hover:text-emerald-300 transition cursor-pointer';
+          }
+          if (epsUI.toggleBtn) {
+            epsUI.toggleBtn.className = 'relative shrink-0 w-16 h-9 rounded-full bg-red-500/25 border-2 border-red-500/70 p-1 transition-colors duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amberdash';
+          }
+          if (epsUI.thumb) {
+            epsUI.thumb.className = 'block w-6 h-6 rounded-full bg-red-400 shadow-md transform translate-x-0 transition-all duration-300';
+          }
+          if (epsUI.dial) {
+            epsUI.dial.className = 'relative w-44 h-44 rounded-full bg-dash-base border-[3px] border-red-500/55 shadow-[inset_0_0_32px_rgba(0,0,0,0.92),0_0_28px_rgba(239,68,68,0.2)] flex flex-col items-center justify-center transition-all duration-300';
+          }
+          if (epsUI.arc) {
+            epsUI.arc.setAttribute('stroke', '#ef4444');
+            epsUI.arc.setAttribute('stroke-dasharray', '155 610');
+          }
+          if (epsUI.iconWrap) epsUI.iconWrap.className = 'eps-glow-err';
+          if (epsUI.wheelRing) epsUI.wheelRing.setAttribute('stroke', '#ef4444');
+          if (epsUI.wheelHub) epsUI.wheelHub.setAttribute('fill', '#ef4444');
+          if (epsUI.wheelSpokes) epsUI.wheelSpokes.setAttribute('stroke', '#ef4444');
+          if (epsUI.svgExcl) epsUI.svgExcl.style.opacity = '1';
+          if (epsUI.svgCheck) epsUI.svgCheck.style.opacity = '0';
+          if (epsUI.dialLabel) {
+            epsUI.dialLabel.textContent = 'EPS ERROR';
+            epsUI.dialLabel.className = 'font-mono text-xs font-bold text-red-400 tracking-wider mt-0.5';
+          }
+
+          /* Осциллограмма и прогресс-бары (Аварийный шум и просадка) */
+          if (epsUI.waveStatus) {
+            epsUI.waveStatus.textContent = 'ОБРЫВ / ШУМ';
+            epsUI.waveStatus.className = 'font-bold text-red-400';
+          }
+          if (epsUI.wavePath) {
+            epsUI.wavePath.setAttribute('d', 'M2 22 L28 22 L38 7 L49 38 L62 11 L75 35 L92 22 L120 22 L134 5 L146 40 L160 15 L178 22 L258 22');
+            epsUI.wavePath.setAttribute('stroke', '#ef4444');
+          }
+          if (epsUI.barMosfetVal) {
+            epsUI.barMosfetVal.textContent = '12% (КЗ / ПРОБОЙ)';
+            epsUI.barMosfetVal.className = 'font-bold text-red-400';
+          }
+          if (epsUI.barMosfet) {
+            epsUI.barMosfet.className = 'h-full rounded-full bg-gradient-to-r from-red-500 to-amberdash transition-all duration-500';
+            epsUI.barMosfet.style.width = '12%';
+          }
+          if (epsUI.barPowerVal) {
+            epsUI.barPowerVal.textContent = '18% (ПРОСАДКА)';
+            epsUI.barPowerVal.className = 'font-bold text-amber-400';
+          }
+          if (epsUI.barPower) {
+            epsUI.barPower.className = 'h-full rounded-full bg-gradient-to-r from-amberdash to-red-500 transition-all duration-500';
+            epsUI.barPower.style.width = '18%';
+          }
+
+          /* 6 параметров телеметрии (До ремонта) */
+          if (epsUI.telDtcLbl) epsUI.telDtcLbl.textContent = 'Ошибки';
+          if (epsUI.telDtcVal) {
+            epsUI.telDtcVal.textContent = 'C1290 / U0131 / 00573';
+            epsUI.telDtcVal.className = 'block text-xs font-bold text-amber-300 mt-0.5';
+          }
+          if (epsUI.telMosfetVal) {
+            epsUI.telMosfetVal.textContent = 'ПРОБОЙ';
+            epsUI.telMosfetVal.className = 'block text-xs font-bold text-red-400 mt-0.5';
+          }
+          if (epsUI.telRelayVal) {
+            epsUI.telRelayVal.textContent = 'ОБРЫВ / ПОДГАР';
+            epsUI.telRelayVal.className = 'block text-xs font-bold text-amber-400 mt-0.5';
+          }
+          if (epsUI.telEffortVal) {
+            epsUI.telEffortVal.textContent = '9.4 Н·м (тугой руль)';
+            epsUI.telEffortVal.className = 'block text-xs font-bold text-red-400 mt-0.5';
+          }
+          if (epsUI.telCurrentLbl) epsUI.telCurrentLbl.textContent = 'Ток покоя / нагрузка';
+          if (epsUI.telCurrentVal) {
+            epsUI.telCurrentVal.textContent = '0.0 А (блокировка ЭБУ)';
+            epsUI.telCurrentVal.className = 'block text-xs font-bold text-amber-400 mt-0.5';
+          }
+          if (epsUI.telVoltageVal) {
+            epsUI.telVoltageVal.textContent = '11.8 В';
+            epsUI.telVoltageVal.className = 'block text-xs font-bold text-amber-400 mt-0.5';
+          }
+          if (epsUI.footHint) {
+            epsUI.footHint.textContent = 'Нажмите на переключатель, чтобы увидеть результат после ремонта';
+          }
+          if (epsUI.footTag) {
+            epsUI.footTag.textContent = 'ДО РЕМОНТА';
+            epsUI.footTag.className = 'font-mono font-bold text-amberdash shrink-0';
+          }
+        }
+      }
+
+      /* Привязываем обработчики строго к элементам управления (без клика на eps-panel) */
+      if (epsUI.toggleBtn) {
+        epsUI.toggleBtn.addEventListener('click', function () {
+          setEpsState(!epsIsRepaired);
+        });
+      }
+      if (epsUI.btnBefore) {
+        epsUI.btnBefore.addEventListener('click', function () {
+          setEpsState(false);
+        });
+      }
+      if (epsUI.btnAfter) {
+        epsUI.btnAfter.addEventListener('click', function () {
+          setEpsState(true);
+        });
+      }
+
+      /* Инициализируем начальное состояние */
+      setEpsState(false);
+
+      /* -----------------------------------------------------------
+         3. ВКЛАДКИ ПРОИЗВОДИТЕЛЕЙ И МГНОВЕННЫЙ ПОИСК
+      ----------------------------------------------------------- */
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      const tabPanels = document.querySelectorAll('.tab-panel');
+
+      function activateTab(activeKey) {
+        tabButtons.forEach(function (btn) {
+          const key = btn.getAttribute('data-tab');
+          const isActive = key === activeKey;
+          const isCdek = btn.classList.contains('tab-cdek');
+          btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+
+          if (isActive && isCdek) {
+            btn.className = 'tab-btn tab-cdek px-4 py-2.5 rounded-xl text-sm font-bold border border-transparent bg-gradient-to-r from-emeralddash to-emerald-600 text-slate-950 shadow-emeraldGlow transition';
+          } else if (isActive) {
+            btn.className = 'tab-btn px-4 py-2.5 rounded-xl text-sm font-bold border border-transparent bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 shadow-amberGlow transition';
+          } else if (isCdek) {
+            btn.className = 'tab-btn tab-cdek px-4 py-2.5 rounded-xl text-sm font-bold border border-emeralddash/40 bg-emeralddash/10 text-emerald-300 hover:bg-emeralddash/20 transition';
+          } else {
+            btn.className = 'tab-btn px-4 py-2.5 rounded-xl text-sm font-bold border border-slate-700 bg-dash-surface text-slate-300 hover:border-amberdash/50 hover:text-white transition';
+          }
+        });
+
+        tabPanels.forEach(function (panel) {
+          const match = panel.id === 'panel-' + activeKey;
+          panel.classList.toggle('hidden', !match);
+          panel.classList.toggle('grid', match);
+        });
+      }
+
+      tabButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          activateTab(btn.getAttribute('data-tab'));
+        });
+      });
+      activateTab('korea');
+
+      const BRAND_DB = [
+        { name: 'Hyundai Solaris / Creta / Elantra', desc: 'Блок MDPS, пайка реле и ключей MOSFET, муфта колонки ЭУР', tab: 'korea', cat: 'korea' },
+        { name: 'Kia Rio / Ceed / Sportage', desc: 'Пайка блока MDPS, устранение C1259 / C1290 и стуков колонки', tab: 'korea', cat: 'korea' },
+        { name: 'Lada Granta / Priora / Kalina / Vesta / Niva', desc: 'ЭУР Махачкала, Калуга (Автоэлектроника), Mando — пайка плат, реле, оптопар', tab: 'lada', cat: 'lada' },
+        { name: 'VW Polo / Golf', desc: 'Компонентный ремонт блоков ЭБУ ЭУР NSK / Bosch, снятие «красного руля»', tab: 'europe', cat: 'europe' },
+        { name: 'Skoda Rapid / Octavia', desc: 'Пайка силовых ключей MOSFET, восстановление после влаги и КЗ', tab: 'europe', cat: 'europe' },
+        { name: 'Renault / BMW / Mercedes / Audi', desc: 'Ремонт блоков ЭБУ ЭУР, восстановление CAN-шины и кодировок', tab: 'europe', cat: 'europe' },
+        { name: 'Toyota / Honda / Nissan / Mazda / Mitsubishi', desc: 'Замена силовых реле и ключей MOSFET, калибровка датчика момента', tab: 'japan_usa', cat: 'japan_usa' },
+        { name: 'Ford / Chevrolet', desc: 'Ремонт блока управления ЭУР, устранение ошибок U3000', tab: 'japan_usa', cat: 'japan_usa' },
+        { name: 'Geely / Chery / Haval / Changan', desc: 'Компонентный ремонт плат ЭБУ ЭУР без ожидания запчастей', tab: 'china_ev', cat: 'china_ev' },
+        { name: 'BYD / Evolute / Zeekr', desc: 'Ремонт блоков ЭУР для электромобилей и гибридов', tab: 'china_ev', cat: 'china_ev' }
+      ];
+
+      const searchInput = document.getElementById('brand-search');
+      const searchClear = document.getElementById('brand-search-clear');
+      const searchResults = document.getElementById('search-results');
+      const searchGrid = document.getElementById('search-results-grid');
+      const searchCount = document.getElementById('search-results-count');
+      const searchResetBtn = document.getElementById('search-reset-btn');
+
+      function resetSearch() {
+        if (searchInput) searchInput.value = '';
+        if (searchClear) searchClear.classList.add('hidden');
+        if (searchResults) searchResults.classList.add('hidden');
+      }
+
+      if (searchClear) searchClear.addEventListener('click', resetSearch);
+      if (searchResetBtn) searchResetBtn.addEventListener('click', resetSearch);
+
+      if (searchInput) {
+        searchInput.addEventListener('input', function () {
+          const raw = searchInput.value.trim();
+          const q = raw.toLowerCase();
+          if (searchClear) searchClear.classList.toggle('hidden', q.length === 0);
+
+          if (q.length < 2) {
+            if (searchResults) searchResults.classList.add('hidden');
+            return;
+          }
+
+          const hits = BRAND_DB.filter(function (item) {
+            return item.name.toLowerCase().indexOf(q) !== -1 || item.desc.toLowerCase().indexOf(q) !== -1;
+          });
+
+          if (!searchGrid || !searchResults || !searchCount) return;
+          searchGrid.innerHTML = '';
+          searchResults.classList.remove('hidden');
+
+          if (hits.length > 0) {
+            activateTab(hits[0].tab);
+            searchCount.textContent = 'Найдено совпадений: ' + hits.length;
+
+            hits.forEach(function (item) {
+              const card = document.createElement('div');
+              card.className = 'rounded-xl bg-dash-surface border border-slate-700 p-3.5 flex flex-col justify-between gap-3';
+              const title = document.createElement('strong');
+              title.className = 'text-sm text-white';
+              title.textContent = item.name;
+              const desc = document.createElement('span');
+              desc.className = 'text-xs text-slate-400';
+              desc.textContent = item.desc;
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'w-full py-2 rounded-lg bg-gradient-to-r from-amberdash to-amberdash-hot text-slate-950 font-bold text-xs';
+              btn.textContent = 'В калькулятор →';
+              btn.addEventListener('click', function () {
+                jumpToCalculator(item.cat, 'ecu', item.name);
+              });
+              card.appendChild(title);
+              card.appendChild(desc);
+              card.appendChild(btn);
+              searchGrid.appendChild(card);
+            });
+          } else {
+            searchCount.textContent = 'Работаем со всеми марками — индивидуальный расчёт';
+            const card = document.createElement('div');
+            card.className = 'rounded-xl bg-dash-surface border border-emeralddash/40 p-4 flex flex-col justify-between gap-3';
+            const title = document.createElement('strong');
+            title.className = 'text-sm text-white';
+            title.textContent = 'Ремонтируем ЭУР и блоки ЭБУ для «' + raw + '»';
+            const desc = document.createElement('span');
+            desc.className = 'text-xs text-slate-400';
+            desc.textContent = 'Выполняем компонентную пайку платы и проверку на нагрузочном стенде.';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'w-full py-2 rounded-lg bg-emeralddash text-slate-950 font-bold text-xs';
+            btn.textContent = 'Рассчитать стоимость →';
+            btn.addEventListener('click', function () {
+              jumpToCalculator('europe', 'ecu', raw);
+            });
+            card.appendChild(title);
+            card.appendChild(desc);
+            card.appendChild(btn);
+            searchGrid.appendChild(card);
+          }
+        });
+      }
+
+      /* -----------------------------------------------------------
+         4. ИНТЕРАКТИВНЫЙ КАЛЬКУЛЯТОР (СТРОГО ФОРМАТ «ОТ X ₽»)
+      ----------------------------------------------------------- */
+      const calcCategory = document.getElementById('calc-category');
+      const ladaSubBox = document.getElementById('lada-sub-box');
+      const calcModel = document.getElementById('calc-model');
+      const calcPrice = document.getElementById('calc-price');
+      const calcTime = document.getElementById('calc-time');
+      const calcCause = document.getElementById('calc-cause');
+      const calcApplyBtn = document.getElementById('calc-apply-btn');
+
+      const calcState = {
+        category: 'korea',
+        ladaFactory: 'makhachkala',
+        unit: 'ecu',
+        symptoms: ['eps_lamp']
+      };
+
+      const CAT_LABELS = {
+        korea: 'Корея (Hyundai / Kia)',
+        lada: 'Отечественные / Lada',
+        europe: 'Европа и VAG',
+        japan_usa: 'Япония и США',
+        china_ev: 'Китай и Электромобили'
+      };
+
+      const LADA_LABELS = {
+        makhachkala: 'Махачкала',
+        kaluga: 'Калуга (Автоэлектроника)',
+        mando: 'Mando',
+        unknown: 'Не определён'
+      };
+
+      const UNIT_LABELS = {
+        ecu: 'Электронный блок управления ЭБУ ЭУР',
+        column: 'Рулевая колонка с ЭУР в сборе',
+        sensor: 'Датчик крутящего момента'
+      };
+
+      const SYM_LABELS = {
+        eps_lamp: 'Горит лампа EPS',
+        heavy_wheel: 'Руль стал тугим',
+        jerks_beat: 'Закусывает / дёргает',
+        cuts_out: 'Отключается на ходу',
+        noise_clicks: 'Посторонний гул / щелчки',
+        water_polarity: 'После влаги / переполюсовки'
+      };
+
+      let latestCalc = null;
+
+      function fmtRub(num) {
+        const rounded = Math.max(5000, Math.round(num / 100) * 100);
+        return rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+      }
+
+      function styleCalcButtons() {
+        document.querySelectorAll('.lada-opt').forEach(function (btn) {
+          const active = btn.getAttribute('data-lada') === calcState.ladaFactory;
+          btn.className = active
+            ? 'lada-opt py-2.5 px-2 rounded-xl border border-amberdash bg-amberdash/15 text-white text-xs font-bold transition'
+            : 'lada-opt py-2.5 px-2 rounded-xl border border-slate-700 bg-dash-base text-slate-300 hover:border-amberdash/50 text-xs font-bold transition';
+        });
+
+        document.querySelectorAll('.unit-opt').forEach(function (btn) {
+          const active = btn.getAttribute('data-unit') === calcState.unit;
+          btn.className = active
+            ? 'unit-opt p-3.5 rounded-xl border border-amberdash bg-amberdash/15 text-white text-left transition'
+            : 'unit-opt p-3.5 rounded-xl border border-slate-700 bg-dash-input text-slate-300 hover:border-amberdash/50 text-left transition';
+        });
+
+        document.querySelectorAll('.sym-btn').forEach(function (btn) {
+          const active = calcState.symptoms.indexOf(btn.getAttribute('data-sym')) !== -1;
+          btn.className = active
+            ? 'sym-btn flex items-start gap-2.5 p-3 rounded-xl border border-amberdash bg-amberdash/15 text-white text-left text-[13px] font-semibold transition'
+            : 'sym-btn flex items-start gap-2.5 p-3 rounded-xl border border-slate-700 bg-dash-input text-slate-300 hover:border-amberdash/50 text-left text-[13px] font-semibold transition';
+          const box = btn.querySelector('.sym-box');
+          if (box) {
+            box.className = active
+              ? 'sym-box w-[18px] h-[18px] rounded-[5px] border border-amberdash bg-amberdash text-slate-950 flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-extrabold'
+              : 'sym-box w-[18px] h-[18px] rounded-[5px] border border-slate-500 flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-extrabold';
+            box.textContent = active ? '✓' : '';
+          }
+        });
+      }
+
+      function updateCalculator() {
+        styleCalcButtons();
+        const cat = calcState.category;
+        if (ladaSubBox) ladaSubBox.classList.toggle('hidden', cat !== 'lada');
+
+        const base = {
+          korea:     { ecu: 5000, column: 5000, sensor: 5000 },
+          lada:      { ecu: 5000, column: 5000, sensor: 5000 },
+          europe:    { ecu: 7000, column: 7500, sensor: 5500 },
+          japan_usa: { ecu: 6000, column: 6500, sensor: 5000 },
+          china_ev:  { ecu: 8000, column: 8500, sensor: 6000 }
+        };
+
+        let minPrice = base[cat][calcState.unit];
+        let timeText = '2 – 4 часа';
+
+        if (cat === 'lada' && calcState.ladaFactory === 'mando') {
+          minPrice += 500;
+        } else if (cat === 'lada' && calcState.ladaFactory === 'kaluga') {
+          minPrice += 300;
+        }
+
+        const syms = calcState.symptoms;
+        const hasWater = syms.indexOf('water_polarity') !== -1;
+        const hasCuts = syms.indexOf('cuts_out') !== -1;
+        const hasJerks = syms.indexOf('jerks_beat') !== -1;
+        const hasNoise = syms.indexOf('noise_clicks') !== -1;
+        const hasHeavy = syms.indexOf('heavy_wheel') !== -1;
+
+        if (hasWater) {
+          minPrice += 1500;
+          timeText = 'от 4 часов (1 рабочий день)';
+        }
+        if (hasCuts && syms.length > 1) {
+          minPrice += 500;
+        }
+        if (hasJerks && calcState.unit !== 'sensor') {
+          minPrice += 800;
+        }
+        if (hasNoise && calcState.unit === 'column') {
+          minPrice += 500;
+        }
+
+        let cause = '';
+        if (hasWater) {
+          cause = 'Попадание влаги или переполюсовка: пробой силовых ключей MOSFET, окисление и выгорание дорожек платы ЭБУ ЭУР. Выполним ультразвуковую чистку, пайку под микроскопом, восстановление дорожек и тест на стенде.';
+        } else if (hasCuts) {
+          cause = 'Типовой признак подгорания контактов силового реле питания, микротрещин пайки или перегрева MOSFET-ключей в блоке ЭУР. Заменим силовое реле и ключи, проверим блок под нагрузкой.';
+        } else if (hasJerks || calcState.unit === 'sensor') {
+          cause = 'Сбой датчика крутящего момента или оптических датчиков положения ротора. Отремонтируем датчик, устраним рывки и закусывание, выполним точную калибровку нулевой точки.';
+        } else if (hasNoise) {
+          cause = 'Износ демпферной муфты, подшипников электромотора или редуктора рулевой колонки с ЭУР, либо подгорание силового реле (щелчки). Проведём дефектовку механики и электроники.';
+        } else if (hasHeavy) {
+          cause = 'Отказ силового каскада (пробой MOSFET-транзисторов или обрыв силового реле) в электронном блоке управления ЭУР. Перепаяем компоненты на усиленные аналоги и проверим на стенде.';
+        } else {
+          cause = 'Неисправность силового каскада (ключи MOSFET, реле питания), драйвера или датчика крутящего момента. Включает стендовую диагностику, компонентную пайку платы и финальный прогон.';
+        }
+
+        const priceStr = 'от ' + fmtRub(minPrice) + ' ₽';
+        if (calcPrice) calcPrice.textContent = priceStr;
+        if (calcTime) calcTime.textContent = timeText;
+        if (calcCause) calcCause.textContent = cause;
+
+        const customModel = calcModel ? calcModel.value.trim() : '';
+        const symNames = syms.length
+          ? syms.map(function (k) { return SYM_LABELS[k]; }).join(', ')
+          : 'Не указаны';
+
+        latestCalc = {
+          categoryLabel: CAT_LABELS[cat],
+          ladaLabel: cat === 'lada' ? LADA_LABELS[calcState.ladaFactory] : '',
+          model: customModel,
+          unitLabel: UNIT_LABELS[calcState.unit],
+          symptomsText: symNames,
+          priceStr: priceStr,
+          timeText: timeText
+        };
+      }
+
+      if (calcCategory) {
+        calcCategory.addEventListener('change', function () {
+          calcState.category = calcCategory.value;
+          updateCalculator();
+        });
+      }
+
+      if (calcModel) {
+        calcModel.addEventListener('input', updateCalculator);
+      }
+
+      document.querySelectorAll('.lada-opt').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          calcState.ladaFactory = btn.getAttribute('data-lada');
+          updateCalculator();
+        });
+      });
+
+      document.querySelectorAll('.unit-opt').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          calcState.unit = btn.getAttribute('data-unit');
+          updateCalculator();
+        });
+      });
+
+      document.querySelectorAll('.sym-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const sym = btn.getAttribute('data-sym');
+          const idx = calcState.symptoms.indexOf(sym);
+          if (idx === -1) {
+            calcState.symptoms.push(sym);
+          } else {
+            calcState.symptoms.splice(idx, 1);
+          }
+          updateCalculator();
+        });
+      });
+
+      function jumpToCalculator(category, unit, modelName) {
+        if (category && calcCategory) {
+          calcState.category = category;
+          calcCategory.value = category;
+        }
+        if (unit) {
+          calcState.unit = unit;
+        }
+        if (modelName && calcModel) {
+          calcModel.value = modelName;
+        }
+        updateCalculator();
+        const calcSection = document.getElementById('calculator');
+        if (calcSection) calcSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      document.querySelectorAll('.quick-brand').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          jumpToCalculator(btn.getAttribute('data-cat'), 'ecu', btn.getAttribute('data-brand'));
+        });
+      });
+
+      document.querySelectorAll('.jump-calc-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          jumpToCalculator(btn.getAttribute('data-cat'), btn.getAttribute('data-unit'), btn.getAttribute('data-brand'));
+        });
+      });
+
+      updateCalculator();
+
+      /* -----------------------------------------------------------
+         5. ПЕРЕНОС РАСЧЁТА / УСЛУГИ В ФОРМУ ЗАПИСИ
+      ----------------------------------------------------------- */
+      const attachedBox = document.getElementById('calc-attached-box');
+      const attachedText = document.getElementById('calc-attached-text');
+      const attachedReset = document.getElementById('calc-attached-reset');
+      const bfDetails = document.getElementById('bf-details');
+      const bfCar = document.getElementById('bf-car');
+      const bfName = document.getElementById('bf-name');
+      const bookingBlock = document.getElementById('booking-block');
+
+      function attachToBooking(summaryText, carValue) {
+        if (bfDetails) bfDetails.value = summaryText;
+        if (carValue && bfCar) bfCar.value = carValue;
+        if (attachedText) attachedText.textContent = summaryText;
+        if (attachedBox) attachedBox.classList.remove('hidden');
+        if (bookingBlock) bookingBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(function () {
+          if (bfName) bfName.focus({ preventScroll: true });
+        }, 500);
+      }
+
+      if (calcApplyBtn) {
+        calcApplyBtn.addEventListener('click', function () {
+          updateCalculator();
+          if (!latestCalc) return;
+          const autoLine = latestCalc.model
+            ? latestCalc.categoryLabel + ' — ' + latestCalc.model
+            : latestCalc.categoryLabel;
+          const ladaPart = latestCalc.ladaLabel ? ' (ЭУР: ' + latestCalc.ladaLabel + ')' : '';
+          const summary =
+            'Авто: ' + autoLine + ladaPart +
+            ' | Узел: ' + latestCalc.unitLabel +
+            ' | Симптомы: ' + latestCalc.symptomsText +
+            ' | Ориентир: ' + latestCalc.priceStr + ' (' + latestCalc.timeText + ')';
+
+          attachToBooking(summary, latestCalc.model || latestCalc.categoryLabel);
+          showToast('Расчёт перенесён в форму записи');
+        });
+      }
+
+      if (attachedReset) {
+        attachedReset.addEventListener('click', function () {
+          if (attachedBox) attachedBox.classList.add('hidden');
+          if (bfDetails) bfDetails.value = '';
+        });
+      }
+
+      document.querySelectorAll('.price-pick-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const service = btn.getAttribute('data-service') || '';
+          const price = btn.getAttribute('data-price') || '';
+          attachToBooking('Выбранная услуга из прайса: ' + service + ' (' + price + ')', '');
+          showToast('Услуга добавлена в заявку');
+        });
+      });
+
+      const cdekBookingBtn = document.getElementById('cdek-booking-btn');
+      if (cdekBookingBtn) {
+        cdekBookingBtn.addEventListener('click', function () {
+          attachToBooking('Отправка снятого блока ЭБУ ЭУР / колонки через СДЭК в Уфу — нужна инструкция и реквизиты получателя', '');
+          showToast('Запрос по отправке СДЭК добавлен в форму');
+        });
+      }
+
+      /* -----------------------------------------------------------
+         6. FAQ АККОРДЕОН
+      ----------------------------------------------------------- */
+      const faqItems = document.querySelectorAll('.faq-item');
+      faqItems.forEach(function (item) {
+        const trigger = item.querySelector('.faq-trigger');
+        if (!trigger) return;
+        trigger.addEventListener('click', function () {
+          const isOpen = item.getAttribute('data-open') === 'true';
+          faqItems.forEach(function (other) {
+            other.setAttribute('data-open', 'false');
+          });
+          if (!isOpen) {
+            item.setAttribute('data-open', 'true');
+          }
+        });
+      });
+
+      /* -----------------------------------------------------------
+         7. ФОРМА ЗАПИСИ: МАСКА ТЕЛЕФОНА, КАНАЛ СВЯЗИ И МОДАЛКА
+      ----------------------------------------------------------- */
+      const bfPhone = document.getElementById('bf-phone');
+      const bfChannel = document.getElementById('bf-channel');
+      const bfError = document.getElementById('bf-error');
+      const bookingForm = document.getElementById('booking-form');
+      const channelButtons = document.querySelectorAll('.channel-btn');
+
+      function styleChannelButtons(selected) {
+        if (bfChannel) bfChannel.value = selected;
+        channelButtons.forEach(function (btn) {
+          const active = btn.getAttribute('data-channel') === selected;
+          btn.className = active
+            ? 'channel-btn min-h-[44px] rounded-xl border border-amberdash bg-amberdash/15 text-amber-200 text-sm font-bold transition'
+            : 'channel-btn min-h-[44px] rounded-xl border border-slate-700 bg-dash-input text-slate-300 hover:border-amberdash/50 text-sm font-bold transition';
+        });
+      }
+
+      channelButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          styleChannelButtons(btn.getAttribute('data-channel'));
+        });
+      });
+      styleChannelButtons('Звонок');
+
+      /* Маска российского номера телефона */
+      function formatRuPhone(rawValue) {
+        let digits = rawValue.replace(/\D/g, '');
+        if (!digits) return '';
+        if (digits[0] === '8') digits = '7' + digits.slice(1);
+        if (digits[0] !== '7') digits = '7' + digits;
+        digits = digits.slice(0, 11);
+
+        let res = '+7';
+        if (digits.length > 1) res += ' (' + digits.slice(1, 4);
+        if (digits.length >= 4) res += ')';
+        if (digits.length > 4) res += ' ' + digits.slice(4, 7);
+        if (digits.length > 7) res += '-' + digits.slice(7, 9);
+        if (digits.length > 9) res += '-' + digits.slice(9, 11);
+        return res;
+      }
+
+      if (bfPhone) {
+        bfPhone.addEventListener('input', function () {
+          bfPhone.value = formatRuPhone(bfPhone.value);
+        });
+      }
+
+      /* Модальное окно подтверждения */
+      const successModal = document.getElementById('success-modal');
+      const modalCloseBtn = document.getElementById('modal-close-btn');
+      const modalSummary = document.getElementById('modal-summary');
+
+      function openModal(text) {
+        if (!successModal) return;
+        if (modalSummary) modalSummary.textContent = text;
+        successModal.classList.remove('hidden');
+        successModal.classList.add('flex');
+      }
+
+      function closeModal() {
+        if (!successModal) return;
+        successModal.classList.add('hidden');
+        successModal.classList.remove('flex');
+      }
+
+      if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
+      if (successModal) {
+        successModal.addEventListener('click', function (e) {
+          if (e.target === successModal) closeModal();
+        });
+      }
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal();
+      });
+
+      if (bookingForm) {
+        bookingForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          const nameVal = bfName ? bfName.value.trim() : '';
+          const phoneVal = bfPhone ? bfPhone.value.trim() : '';
+          const phoneDigits = phoneVal.replace(/\D/g, '');
+          const carVal = bfCar ? bfCar.value.trim() : '';
+          const detailsVal = bfDetails ? bfDetails.value.trim() : '';
+          const channelVal = bfChannel ? bfChannel.value : 'Звонок';
+
+          if (!nameVal) {
+            if (bfError) {
+              bfError.textContent = 'Пожалуйста, укажите ваше имя.';
+              bfError.classList.remove('hidden');
+            }
+            if (bfName) bfName.focus();
+            return;
+          }
+
+          if (phoneDigits.length < 11) {
+            if (bfError) {
+              bfError.textContent = 'Введите корректный российский номер телефона (11 цифр).';
+              bfError.classList.remove('hidden');
+            }
+            if (bfPhone) bfPhone.focus();
+            return;
+          }
+
+          if (bfError) bfError.classList.add('hidden');
+
+          const summaryLines = [
+            'Имя: ' + nameVal,
+            'Телефон: ' + phoneVal,
+            'Способ связи: ' + channelVal
+          ];
+          if (carVal) summaryLines.push('Автомобиль: ' + carVal);
+          if (detailsVal) summaryLines.push('Детали: ' + detailsVal);
+
+          openModal(summaryLines.join('\n'));
+          bookingForm.reset();
+          styleChannelButtons('Звонок');
+          if (attachedBox) attachedBox.classList.add('hidden');
+        });
+      }
+    });
+  </script>
+</body>
+</html>
